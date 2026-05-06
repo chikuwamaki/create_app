@@ -1,0 +1,22 @@
+{
+  "name": "shift-app-infra",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy",
+    "bootstrap": "cdk bootstrap"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.758.0",
+    "@aws-sdk/lib-dynamodb": "^3.758.0"
+  },
+  "devDependencies": {
+    "aws-cdk-lib": "^2.141.0",
+    "constructs": "^10.3.0",
+    "esbuild": "^0.21.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

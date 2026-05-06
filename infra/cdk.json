@@ -1,0 +1,7 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/shift-app-infra.ts",
+  "context": {
+    "userPoolId": "ap-northeast-1_30APSJN3w",
+    "allowedOrigin": "http://localhost:5173"
+  }
+}

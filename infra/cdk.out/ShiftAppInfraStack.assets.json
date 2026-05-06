@@ -1,0 +1,36 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c": {
+      "displayName": "ShiftSubmissionHandler/Code",
+      "source": {
+        "path": "asset.06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "441751859687-ap-northeast-1-2357f091": {
+          "bucketName": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+          "objectKey": "06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c.zip",
+          "region": "ap-northeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::441751859687:role/cdk-hnb659fds-file-publishing-role-441751859687-ap-northeast-1"
+        }
+      }
+    },
+    "b8b93c6b77b98dcb5616cf0b0c507f86437c0ee7832a65375354a80cc7aa40ab": {
+      "displayName": "ShiftAppInfraStack Template",
+      "source": {
+        "path": "ShiftAppInfraStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "441751859687-ap-northeast-1-a4747c9c": {
+          "bucketName": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+          "objectKey": "b8b93c6b77b98dcb5616cf0b0c507f86437c0ee7832a65375354a80cc7aa40ab.json",
+          "region": "ap-northeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::441751859687:role/cdk-hnb659fds-file-publishing-role-441751859687-ap-northeast-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

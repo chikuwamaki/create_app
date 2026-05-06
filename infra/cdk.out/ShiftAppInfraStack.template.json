@@ -1,0 +1,1326 @@
+{
+ "Resources": {
+  "ShiftSubmissions68C29173": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "pk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "sk",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "pk",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "sk",
+      "KeyType": "RANGE"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissions/Resource"
+   }
+  },
+  "ShiftSubmissionHandlerServiceRole3388AC6D": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/ServiceRole/Resource"
+   }
+  },
+  "ShiftSubmissionHandlerServiceRoleDefaultPolicyB645710B": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissions68C29173",
+          "Arn"
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissions68C29173",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ShiftSubmissionHandlerServiceRoleDefaultPolicyB645710B",
+    "Roles": [
+     {
+      "Ref": "ShiftSubmissionHandlerServiceRole3388AC6D"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ShiftSubmissionHandlerC0B57CDE": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "TABLE_NAME": {
+       "Ref": "ShiftSubmissions68C29173"
+      },
+      "CORS_ORIGIN": "http://localhost:5173"
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerServiceRole3388AC6D",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "ShiftSubmissionHandlerServiceRoleDefaultPolicyB645710B",
+    "ShiftSubmissionHandlerServiceRole3388AC6D"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/Resource",
+    "aws:asset:path": "asset.06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "CognitoAuthorizerF3215DBC": {
+   "Type": "AWS::ApiGateway::Authorizer",
+   "Properties": {
+    "IdentitySource": "method.request.header.Authorization",
+    "Name": "ShiftAppInfraStackCognitoAuthorizer69DCD321",
+    "ProviderARNs": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_30APSJN3w"
+       ]
+      ]
+     }
+    ],
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    },
+    "Type": "COGNITO_USER_POOLS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/CognitoAuthorizer/Resource"
+   }
+  },
+  "ShiftApi051B5FF2": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Name": "ShiftApi"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Resource"
+   }
+  },
+  "ShiftApiCloudWatchRole03F2DC9C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/CloudWatchRole/Resource"
+   }
+  },
+  "ShiftApiAccount00440934": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "ShiftApiCloudWatchRole03F2DC9C",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "ShiftApi051B5FF2"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Account"
+   }
+  },
+  "ShiftApiDeploymentE909B7A4700bad3f08d3c6e3146e3aa49ed25cc6": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Automatically created by the RestApi construct",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "DependsOn": [
+    "ShiftApiassignmentsGET7B382AEC",
+    "ShiftApiassignmentsOPTIONS2959A6F6",
+    "ShiftApiassignmentsPOST622551FB",
+    "ShiftApiassignmentsA2E71C55",
+    "ShiftApiavailabilityGET2274AE82",
+    "ShiftApiavailabilityOPTIONS95F8AE4A",
+    "ShiftApiavailabilityPOST3C496B47",
+    "ShiftApiavailability11857417",
+    "ShiftApiOPTIONS09EC45FA",
+    "ShiftApipublishGETA53CA410",
+    "ShiftApipublishOPTIONS61BE1FFF",
+    "ShiftApipublishPOSTB14B1B9E",
+    "ShiftApipublish1BE7BC5B",
+    "ShiftApiDefault4xxE8D84BF1",
+    "ShiftApiDefault5xxD687B6D0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "ShiftApiDeploymentStageprod18F22251": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "ShiftApiDeploymentE909B7A4700bad3f08d3c6e3146e3aa49ed25cc6"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    },
+    "StageName": "prod"
+   },
+   "DependsOn": [
+    "ShiftApiAccount00440934"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "ShiftApiOPTIONS09EC45FA": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "ShiftApi051B5FF2",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiavailability11857417": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ShiftApi051B5FF2",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "availability",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/Resource"
+   }
+  },
+  "ShiftApiavailabilityOPTIONS95F8AE4A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiavailability11857417"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiavailabilityGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETavailabilityC21E1760": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..availability"
+   }
+  },
+  "ShiftApiavailabilityGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETavailability64D0AA6D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..availability"
+   }
+  },
+  "ShiftApiavailabilityGET2274AE82": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiavailability11857417"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/GET/Resource"
+   }
+  },
+  "ShiftApiavailabilityPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTavailabilityDA471ED6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..availability"
+   }
+  },
+  "ShiftApiavailabilityPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTavailability62CCD794": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..availability"
+   }
+  },
+  "ShiftApiavailabilityPOST3C496B47": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiavailability11857417"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/availability/POST/Resource"
+   }
+  },
+  "ShiftApiassignmentsA2E71C55": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ShiftApi051B5FF2",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "assignments",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/Resource"
+   }
+  },
+  "ShiftApiassignmentsOPTIONS2959A6F6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiassignmentsA2E71C55"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiassignmentsGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETassignments3BBB2D31": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..assignments"
+   }
+  },
+  "ShiftApiassignmentsGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETassignments1390FECE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..assignments"
+   }
+  },
+  "ShiftApiassignmentsGET7B382AEC": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiassignmentsA2E71C55"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/GET/Resource"
+   }
+  },
+  "ShiftApiassignmentsPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTassignments8A081836": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..assignments"
+   }
+  },
+  "ShiftApiassignmentsPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTassignments2DB99A6F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..assignments"
+   }
+  },
+  "ShiftApiassignmentsPOST622551FB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiassignmentsA2E71C55"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/assignments/POST/Resource"
+   }
+  },
+  "ShiftApipublish1BE7BC5B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ShiftApi051B5FF2",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "publish",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/Resource"
+   }
+  },
+  "ShiftApipublishOPTIONS61BE1FFF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApipublish1BE7BC5B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/OPTIONS/Resource"
+   }
+  },
+  "ShiftApipublishGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETpublish71AB2101": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..publish"
+   }
+  },
+  "ShiftApipublishGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETpublishAF7518D2": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..publish"
+   }
+  },
+  "ShiftApipublishGETA53CA410": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApipublish1BE7BC5B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/GET/Resource"
+   }
+  },
+  "ShiftApipublishPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTpublish56BE3339": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..publish"
+   }
+  },
+  "ShiftApipublishPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTpublishDE627895": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..publish"
+   }
+  },
+  "ShiftApipublishPOSTB14B1B9E": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApipublish1BE7BC5B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/POST/Resource"
+   }
+  },
+  "ShiftApiDefault4xxE8D84BF1": {
+   "Type": "AWS::ApiGateway::GatewayResponse",
+   "Properties": {
+    "ResponseParameters": {
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+     "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+     "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+    },
+    "ResponseType": "DEFAULT_4XX",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default4xx/Resource"
+   }
+  },
+  "ShiftApiDefault5xxD687B6D0": {
+   "Type": "AWS::ApiGateway::GatewayResponse",
+   "Properties": {
+    "ResponseParameters": {
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+     "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+     "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+    },
+    "ResponseType": "DEFAULT_5XX",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default5xx/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Q0W7CMAz8Ft5Dxsr4gMLEnrahsj2jNDXFpY2r2hnqqv77lJQNtKc7+3L2xYlOVolezMyF57Y4z2vM9bAXY8/KXPgwFL0zDRW5Hj5MXoPaHF0ko6pNkxfm4KiAivVbhK13VpCcQtPoIaPJEHFHNdo+lBMbFS8PhhmEdRpA8VKvvT2DrA3DdbweNkf3NzWYoWuQGcmNyrRYGoGL6fWwodKh0CdDtyOqOfVyog6/oQuuuyoDlrTFmOtGU2vJO1HP0NbUN+AkdO+qvZgyfmYiGTD5zkKM+gpyoiKIV/arXpdM/GWKmgG35Dhq/1rjeHPGk4Rd6Mrw9N1L62VU4dy64oev5Ek/rvRiVjHivPNOsAGdTfgDMCst7dUBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ShiftApiEndpoint156A26DF": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ShiftApi051B5FF2"
+      },
+      ".execute-api.ap-northeast-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ShiftApiDeploymentStageprod18F22251"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ShiftApi051B5FF2"
+      },
+      ".execute-api.ap-northeast-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ShiftApiDeploymentStageprod18F22251"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "TableName": {
+   "Value": {
+    "Ref": "ShiftSubmissions68C29173"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

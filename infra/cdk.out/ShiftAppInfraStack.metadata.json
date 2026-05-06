@@ -1,0 +1,648 @@
+{
+  "/ShiftAppInfraStack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ApiUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiUrl"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:116:5)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/TableName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TableName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:117:5)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals, @cspotcode\\source-map-support...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals, @cspotcode\\source-map-support...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftSubmissions/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftSubmissions68C29173"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Table2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:22:19)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftSubmissionHandler/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftSubmissionHandlerC0B57CDE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new NodejsFunction in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:29:21)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/CognitoAuthorizer/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CognitoAuthorizerF3215DBC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new CognitoUserPoolsAuthorizer2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:51:24)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApi051B5FF2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Account": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiAccount00440934"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Endpoint": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiEndpoint156A26DF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, node internals, @cspotcode\\source-map-support...",
+        "(no user code in 9007199254740991 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftSubmissionHandler/ServiceRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftSubmissionHandlerServiceRole3388AC6D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new NodejsFunction in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:29:21)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/CloudWatchRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiCloudWatchRole03F2DC9C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Deployment/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiDeploymentE909B7A4700bad3f08d3c6e3146e3aa49ed25cc6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/DeploymentStage.prod/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiDeploymentStageprod18F22251"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default4xx/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiDefault4xxE8D84BF1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addGatewayResponse in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:71:9)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default5xx/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiDefault5xxD687B6D0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addGatewayResponse in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:76:9)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftSubmissionHandler/ServiceRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftSubmissionHandlerServiceRoleDefaultPolicyB645710B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.grantReadWriteData in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:43:11)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/OPTIONS/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiOPTIONS09EC45FA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new RestApi2 in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:57:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailability11857417"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:81:35)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsA2E71C55"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:82:34)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublish1BE7BC5B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:83:30)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/OPTIONS/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityOPTIONS95F8AE4A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:81:35)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..availability": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETavailabilityC21E1760"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:86:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..availability": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETavailability64D0AA6D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:86:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/GET/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityGET2274AE82"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:86:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..availability": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTavailabilityDA471ED6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:91:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..availability": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTavailability62CCD794"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:91:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/availability/POST/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiavailabilityPOST3C496B47"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:91:18)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/OPTIONS/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsOPTIONS2959A6F6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:82:34)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..assignments": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETassignments3BBB2D31"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:96:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..assignments": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETassignments1390FECE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:96:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/GET/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsGET7B382AEC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:96:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..assignments": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTassignments8A081836"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:101:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..assignments": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTassignments2DB99A6F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:101:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/assignments/POST/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApiassignmentsPOST622551FB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:101:17)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/OPTIONS/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishOPTIONS61BE1FFF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...RootResource.addResource in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:83:30)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..publish": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETpublish71AB2101"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:106:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..publish": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETpublishAF7518D2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:106:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/GET/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishGETA53CA410"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:106:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..publish": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTpublish56BE3339"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:111:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..publish": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTpublishDE627895"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:111:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/ShiftAppInfraStack/ShiftApi/Default/publish/POST/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ShiftApipublishPOSTB14B1B9E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addMethod in aws-cdk-lib...",
+        "new ShiftAppInfraStack (C:\\アプリ作成\\infra\\lib\\shift-app-infra-stack.ts:111:13)",
+        "<anonymous> (C:\\アプリ作成\\infra\\bin\\shift-app-infra.ts:14:1)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ]
+}
