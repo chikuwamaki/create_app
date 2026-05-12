@@ -6,6 +6,7 @@ import {
   type Assignment,
   type PublishState
 } from "../api/shiftApi";
+import { formatMonth, getMonthOptions } from "../utils/monthOptions";
 
 type Row = {
   date: string;
@@ -15,7 +16,17 @@ type Row = {
   staffName: string;
 };
 
+type DayCell = {
+  date: string;
+  label: string;
+  inMonth: boolean;
+  isToday: boolean;
+};
+
 const SLOT_MINUTES = 30;
+const days = ["日", "月", "火", "水", "木", "金", "土"];
+const roles = ["ホール", "キッチン"] as const;
+type RoleKey = (typeof roles)[number];
 
 function toMinutes(time: string): number {
   const [hour, minute] = time.split(":").map(Number);
@@ -26,6 +37,65 @@ function toTime(minutes: number): string {
   const hour = `${Math.floor(minutes / 60)}`.padStart(2, "0");
   const minute = `${minutes % 60}`.padStart(2, "0");
   return `${hour}:${minute}`;
+}
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function buildCalendar(monthValue: string): DayCell[][] {
+  const [year, month] = monthValue.split("-").map(Number);
+  const firstDay = new Date(year, month - 1, 1);
+  const start = new Date(firstDay);
+  start.setDate(firstDay.getDate() - firstDay.getDay());
+  const todayKey = formatDate(new Date());
+  const weeks: DayCell[][] = [];
+
+  const cursor = new Date(start);
+  for (let week = 0; week < 6; week += 1) {
+    const row: DayCell[] = [];
+    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+      const cellDate = new Date(cursor);
+      const dateKey = formatDate(cellDate);
+      row.push({
+        date: dateKey,
+        label: `${cellDate.getDate()}`,
+        inMonth: cellDate.getMonth() === month - 1,
+        isToday: dateKey === todayKey
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    weeks.push(row);
+  }
+
+  return weeks;
+}
+
+function buildTimeSlots(
+  startTime: string,
+  endTime: string,
+  intervalMinutes: number
+): string[] {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const start = startHour * 60 + startMinute;
+  const end = endHour * 60 + endMinute;
+  const slots: string[] = [];
+
+  for (let minutes = start; minutes <= end; minutes += intervalMinutes) {
+    slots.push(toTime(minutes));
+  }
+
+  return slots;
+}
+
+function formatSelectedDate(dateKey: string): string {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return `${month}/${day}(${days[date.getDay()]})`;
 }
 
 function formatDateLabel(dateKey: string): string {
@@ -88,10 +158,18 @@ function buildRows(assignments: Assignment[]): Row[] {
   });
 }
 
+const timeSlots = buildTimeSlots("09:00", "21:00", SLOT_MINUTES);
+
 export default function ShiftListPage() {
   const auth = useAuth();
   const idToken = auth.user?.id_token;
-  const [selectedMonth, setSelectedMonth] = useState("2026-06");
+  const userId = (auth.user?.profile as { sub?: string } | undefined)?.sub;
+  const monthOptions = useMemo(() => getMonthOptions(), []);
+  const [selectedMonth, setSelectedMonth] = useState(
+    monthOptions[0] ?? formatMonth(new Date())
+  );
+  const [viewMode, setViewMode] = useState<"self" | "month">("self");
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [publishState, setPublishState] = useState<PublishState>({
     status: "draft"
   });
@@ -99,7 +177,40 @@ export default function ShiftListPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const rows = useMemo(() => buildRows(assignments), [assignments]);
+  const weeks = useMemo(() => buildCalendar(selectedMonth), [selectedMonth]);
+  const selfRows = useMemo(() => {
+    if (!userId) {
+      return [];
+    }
+    return buildRows(assignments.filter((assignment) => assignment.staffId === userId));
+  }, [assignments, userId]);
+
+  const selectedDateLabel = selectedDate
+    ? formatSelectedDate(selectedDate)
+    : "未選択";
+
+  const assignmentsByRole = useMemo(() => {
+    const map: Record<RoleKey, Record<string, string[]>> = {
+      ホール: {},
+      キッチン: {}
+    };
+    if (!selectedDate) {
+      return map;
+    }
+    assignments
+      .filter((assignment) => assignment.date === selectedDate)
+      .forEach((assignment) => {
+        const role = assignment.role as RoleKey;
+        const timeMap = map[role] ?? {};
+        const names = timeMap[assignment.time] ?? [];
+        if (!names.includes(assignment.staffName)) {
+          names.push(assignment.staffName);
+        }
+        timeMap[assignment.time] = names;
+        map[role] = timeMap;
+      });
+    return map;
+  }, [assignments, selectedDate]);
 
   useEffect(() => {
     if (!notice) {
@@ -155,6 +266,14 @@ export default function ShiftListPage() {
     };
   }, [selectedMonth, idToken]);
 
+  useEffect(() => {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    const firstDate = formatDate(new Date(year, month - 1, 1));
+    setSelectedDate((prev) =>
+      prev && prev.startsWith(selectedMonth) ? prev : firstDate
+    );
+  }, [selectedMonth]);
+
   return (
     <section className="panel">
       <h1>シフト確認</h1>
@@ -167,38 +286,139 @@ export default function ShiftListPage() {
           value={selectedMonth}
           onChange={(event) => setSelectedMonth(event.target.value)}
         >
-          <option>2026-06</option>
-          <option>2026-07</option>
-          <option>2026-08</option>
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
         </select>
+        <div className="action-row">
+          <button
+            type="button"
+            className={viewMode === "self" ? "primary-button" : "secondary-button"}
+            onClick={() => setViewMode("self")}
+          >
+            自分のシフト
+          </button>
+          <button
+            type="button"
+            className={viewMode === "month" ? "primary-button" : "secondary-button"}
+            onClick={() => setViewMode("month")}
+          >
+            月間ビュー
+          </button>
+        </div>
       </div>
       {notice ? <div className="notice notice--error">{notice}</div> : null}
       {isLoading ? <p className="hint">シフトを読み込み中...</p> : null}
       {publishState.status !== "published" ? (
         <p className="hint">この月のシフトはまだ公開されていません。</p>
-      ) : rows.length ? (
-        <table className="table" style={{ marginTop: 16 }}>
-          <thead>
-            <tr>
-              <th>日付</th>
-              <th>時間</th>
-              <th>役割</th>
-              <th>担当</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={`${row.date}-${row.role}-${row.staffName}-${index}`}>
-                <td>{formatDateLabel(row.date)}</td>
-                <td>{`${row.start}-${row.end}`}</td>
-                <td>{row.role}</td>
-                <td>{row.staffName}</td>
+      ) : viewMode === "self" ? (
+        selfRows.length ? (
+          <table className="table" style={{ marginTop: 16 }}>
+            <thead>
+              <tr>
+                <th>日付</th>
+                <th>時間</th>
+                <th>役割</th>
+                <th>担当</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {selfRows.map((row, index) => (
+                <tr key={`${row.date}-${row.role}-${row.staffName}-${index}`}>
+                  <td>{formatDateLabel(row.date)}</td>
+                  <td>{`${row.start}-${row.end}`}</td>
+                  <td>{row.role}</td>
+                  <td>{row.staffName}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="hint">該当するシフトがありません。</p>
+        )
       ) : (
-        <p className="hint">公開済みのシフトがありません。</p>
+        <div className="shift-create-layout" style={{ marginTop: 16 }}>
+          <div className="list-card">
+            <h3>日付選択</h3>
+            <div className="calendar">
+              <div className="calendar-header">
+                {days.map((day) => (
+                  <div key={day} className="calendar-day-label">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div className="calendar-grid">
+                {weeks.map((week, weekIndex) => (
+                  <div key={`week-${weekIndex}`} className="calendar-week">
+                    {week.map((day, dayIndex) => (
+                      <button
+                        key={`day-${weekIndex}-${dayIndex}`}
+                        className={[
+                          "calendar-day",
+                          !day.inMonth && "calendar-day--muted",
+                          day.isToday && "calendar-day--today",
+                          day.date === selectedDate &&
+                            "calendar-day--selected"
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        type="button"
+                        disabled={!day.inMonth}
+                        onClick={() => setSelectedDate(day.date)}
+                      >
+                        {day.label}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="hint">選択中: {selectedDateLabel}</p>
+          </div>
+          <div className="list-card">
+            <h3>シフト表</h3>
+            <div className="assignment-table" role="grid">
+              <div
+                className="assignment-row assignment-row--header"
+                style={{
+                  gridTemplateColumns: `72px repeat(${roles.length}, minmax(0, 1fr))`
+                }}
+              >
+                <div className="assignment-time-cell">時間</div>
+                {roles.map((role) => (
+                  <div key={role} className="assignment-staff-cell">
+                    {role}
+                  </div>
+                ))}
+              </div>
+              {timeSlots.map((time) => (
+                <div
+                  key={time}
+                  className="assignment-row"
+                  style={{
+                    gridTemplateColumns: `72px repeat(${roles.length}, minmax(0, 1fr))`
+                  }}
+                >
+                  <div className="assignment-time-cell">{time}</div>
+                  {roles.map((role) => {
+                    const names = assignmentsByRole[role]?.[time] ?? [];
+                    return (
+                      <div
+                        key={`${role}-${time}`}
+                        className="assignment-cell"
+                      >
+                        {names.length ? names.join(" / ") : "—"}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

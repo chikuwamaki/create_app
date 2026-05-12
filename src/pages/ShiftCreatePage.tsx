@@ -10,6 +10,7 @@ import {
   type PublishState,
   type Submission
 } from "../api/shiftApi";
+import { formatMonth, getMonthOptions } from "../utils/monthOptions";
 
 type DayCell = {
   date: string;
@@ -21,6 +22,12 @@ type DayCell = {
 type Assignment = {
   staffId: string;
 };
+
+type AssignmentSlot = Record<string, Assignment>;
+type AssignmentsByDate = Record<
+  string,
+  Record<RoleKey, Record<string, AssignmentSlot>>
+>;
 
 type Notice = {
   tone: "success" | "error";
@@ -100,24 +107,71 @@ function formatSelectedDate(dateKey: string): string {
 
 const timeSlots = buildTimeSlots("09:00", "21:00", 30);
 
+function normalizeAssignments(raw: unknown): AssignmentsByDate {
+  if (!raw || typeof raw !== "object") {
+    return {};
+  }
+
+  const normalized: AssignmentsByDate = {};
+  Object.entries(raw as Record<string, any>).forEach(([date, rolesByDate]) => {
+    if (!rolesByDate || typeof rolesByDate !== "object") {
+      return;
+    }
+
+    roles.forEach((role) => {
+      const times = rolesByDate[role];
+      if (!times || typeof times !== "object") {
+        return;
+      }
+
+      Object.entries(times as Record<string, any>).forEach(([time, value]) => {
+        if (!value || typeof value !== "object") {
+          return;
+        }
+
+        const slot: AssignmentSlot = {};
+        if (typeof value.staffId === "string") {
+          slot[value.staffId] = { staffId: value.staffId };
+        } else {
+          Object.entries(value as Record<string, any>).forEach(
+            ([staffId, assignment]) => {
+              if (typeof assignment?.staffId === "string") {
+                slot[staffId] = { staffId: assignment.staffId };
+              }
+            }
+          );
+        }
+
+        if (Object.keys(slot).length) {
+          normalized[date] =
+            normalized[date] ??
+            ({} as Record<RoleKey, Record<string, AssignmentSlot>>);
+          normalized[date][role] = normalized[date][role] ?? {};
+          normalized[date][role][time] = slot;
+        }
+      });
+    });
+  });
+
+  return normalized;
+}
+
 export default function ShiftCreatePage() {
   const auth = useAuth();
   const idToken = auth.user?.id_token;
-  const [selectedMonth, setSelectedMonth] = useState("2026-06");
+  const monthOptions = useMemo(() => getMonthOptions(), []);
+  const [selectedMonth, setSelectedMonth] = useState(
+    monthOptions[0] ?? formatMonth(new Date())
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<RoleKey>("ホール");
-  const [assignmentsByDate, setAssignmentsByDate] = useState<
-    Record<string, Record<RoleKey, Record<string, Assignment>>>
-  >(() => {
+  const [assignmentsByDate, setAssignmentsByDate] = useState<AssignmentsByDate>(() => {
     const raw = localStorage.getItem("shift-assignments");
     if (!raw) {
       return {};
     }
     try {
-      return JSON.parse(raw) as Record<
-        string,
-        Record<RoleKey, Record<string, Assignment>>
-      >;
+      return normalizeAssignments(JSON.parse(raw));
     } catch {
       return {};
     }
@@ -220,7 +274,11 @@ export default function ShiftCreatePage() {
           result.items.forEach((assignment) => {
             const day = next[assignment.date] ?? {};
             const roleAssignments = day[assignment.role] ?? {};
-            roleAssignments[assignment.time] = { staffId: assignment.staffId };
+            const slotAssignments = roleAssignments[assignment.time] ?? {};
+            roleAssignments[assignment.time] = {
+              ...slotAssignments,
+              [assignment.staffId]: { staffId: assignment.staffId }
+            };
             next[assignment.date] = {
               ...day,
               [assignment.role]: roleAssignments
@@ -265,9 +323,15 @@ export default function ShiftCreatePage() {
     ? assignmentsByDate[selectedDate]?.[selectedRole] ?? {}
     : {};
   const assignedCount = selectedDate
-    ? timeSlots.filter((time) => dayAssignments[time]?.staffId).length
+    ? timeSlots.reduce(
+        (count, time) => count + Object.keys(dayAssignments[time] ?? {}).length,
+        0
+      )
     : 0;
-  const unassignedCount = selectedDate ? timeSlots.length - assignedCount : 0;
+  const unassignedCount = selectedDate
+    ? timeSlots.filter((time) => !Object.keys(dayAssignments[time] ?? {}).length)
+        .length
+    : 0;
   const submissionsForDate = selectedDate
     ? submissions.filter(
         (submission) => (submission.slotsByDate?.[selectedDate]?.length ?? 0) > 0
@@ -307,8 +371,6 @@ export default function ShiftCreatePage() {
       roles: [submission.rolePreference ?? "どちらでも"]
     }));
 
-  const isReadOnly = publishState.status === "published";
-
   const buildAssignmentsPayload = (): ApiAssignment[] => {
     const items: ApiAssignment[] = [];
     Object.entries(assignmentsByDate).forEach(([date, rolesByDate]) => {
@@ -317,14 +379,16 @@ export default function ShiftCreatePage() {
       }
       roles.forEach((role) => {
         const assignments = rolesByDate?.[role] ?? {};
-        Object.entries(assignments).forEach(([time, assignment]) => {
-          const staffName = staffById.get(assignment.staffId) ?? "スタッフ";
-          items.push({
-            date,
-            time,
-            role,
-            staffId: assignment.staffId,
-            staffName
+        Object.entries(assignments).forEach(([time, slotAssignments]) => {
+          Object.values(slotAssignments).forEach((assignment) => {
+            const staffName = staffById.get(assignment.staffId) ?? "スタッフ";
+            items.push({
+              date,
+              time,
+              role,
+              staffId: assignment.staffId,
+              staffName
+            });
           });
         });
       });
@@ -337,10 +401,6 @@ export default function ShiftCreatePage() {
     staffId: string,
     mode: "assign" | "clear"
   ) => {
-    if (isReadOnly) {
-      setNotice({ tone: "error", text: "公開済みのため編集できません。" });
-      return;
-    }
     if (!selectedDate) {
       setNotice({ tone: "error", text: "日付を選択してください。" });
       return;
@@ -349,11 +409,19 @@ export default function ShiftCreatePage() {
       const day = prev[selectedDate] ?? {};
       const roleAssignments = day[selectedRole] ?? {};
       const nextRoleAssignments = { ...roleAssignments };
+      const slotAssignments = nextRoleAssignments[time] ?? {};
+      const nextSlotAssignments = { ...slotAssignments };
       if (mode === "assign") {
-        nextRoleAssignments[time] = { staffId };
+        nextSlotAssignments[staffId] = { staffId };
+        nextRoleAssignments[time] = nextSlotAssignments;
       }
       if (mode === "clear") {
-        delete nextRoleAssignments[time];
+        delete nextSlotAssignments[staffId];
+        if (Object.keys(nextSlotAssignments).length) {
+          nextRoleAssignments[time] = nextSlotAssignments;
+        } else {
+          delete nextRoleAssignments[time];
+        }
       }
       return {
         ...prev,
@@ -366,10 +434,6 @@ export default function ShiftCreatePage() {
   };
 
   const startDrag = (time: string, staffId: string, isSelected: boolean) => {
-    if (isReadOnly) {
-      setNotice({ tone: "error", text: "公開済みのため編集できません。" });
-      return;
-    }
     if (!selectedDate) {
       setNotice({ tone: "error", text: "日付を選択してください。" });
       return;
@@ -391,10 +455,6 @@ export default function ShiftCreatePage() {
       setNotice({ tone: "error", text: "認証情報がありません。" });
       return;
     }
-    if (isReadOnly) {
-      setNotice({ tone: "error", text: "公開済みです。" });
-      return;
-    }
     const assignments = buildAssignmentsPayload();
     if (!assignments.length) {
       setNotice({ tone: "error", text: "割当がありません。" });
@@ -411,7 +471,10 @@ export default function ShiftCreatePage() {
         token: idToken
       });
       setPublishState(nextState);
-      setNotice({ tone: "success", text: "公開しました。" });
+      setNotice({
+        tone: "success",
+        text: "公開しました。"
+      });
     } catch (err) {
       setNotice({
         tone: "error",
@@ -434,9 +497,11 @@ export default function ShiftCreatePage() {
           value={selectedMonth}
           onChange={(event) => setSelectedMonth(event.target.value)}
         >
-          <option>2026-06</option>
-          <option>2026-07</option>
-          <option>2026-08</option>
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
         </select>
         <select
           aria-label="シフト種別を選択"
@@ -453,9 +518,11 @@ export default function ShiftCreatePage() {
           className="primary-button"
           type="button"
           onClick={handlePublish}
-          disabled={isPublishing || isReadOnly}
+          disabled={isPublishing}
         >
-          {isReadOnly ? "公開済み" : isPublishing ? "公開中..." : "公開"}
+          {isPublishing
+            ? "公開中..."
+            : "公開"}
         </button>
       </div>
       <div className="status-row">
@@ -512,11 +579,7 @@ export default function ShiftCreatePage() {
               ))}
             </div>
           </div>
-          <p className="hint">
-            {isReadOnly
-              ? "公開済みのため編集できません。"
-              : "日付を選ぶと割当を編集できます。"}
-          </p>
+          <p className="hint">日付を選ぶと割当を編集できます。</p>
           <h3>提出一覧（{selectedRole}）</h3>
           <ul className="staff-list">
             {staffForRole.length ? (
@@ -570,8 +633,9 @@ export default function ShiftCreatePage() {
                 >
                   <div className="assignment-time-cell">{time}</div>
                   {staffForRole.map((member) => {
-                    const isSelected =
-                      dayAssignments[time]?.staffId === member.id;
+                    const isSelected = Boolean(
+                      dayAssignments[time]?.[member.id]
+                    );
                     const isAvailable =
                       availabilityMap[member.id]?.has(time) ?? false;
                     return (

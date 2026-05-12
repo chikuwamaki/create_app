@@ -2,6 +2,9 @@ import { WebStorageStateStore, type UserManagerSettings } from "oidc-client-ts";
 
 function resolveAuthority(): string {
   const raw =
+    (import.meta.env.VITE_ADMIN_AUTHORITY as string | undefined) ??
+    (import.meta.env.VITE_ADMIN_COGNITO_AUTHORITY as string | undefined) ??
+    (import.meta.env.VITE_ADMIN_COGNITO_DOMAIN as string | undefined) ??
     (import.meta.env.VITE_COGNITO_AUTHORITY as string | undefined) ??
     (import.meta.env.VITE_COGNITO_DOMAIN as string | undefined);
 
@@ -13,7 +16,9 @@ function resolveAuthority(): string {
 }
 
 function resolveHostedDomain(): string {
-  const raw = import.meta.env.VITE_COGNITO_DOMAIN as string | undefined;
+  const raw =
+    (import.meta.env.VITE_ADMIN_COGNITO_DOMAIN as string | undefined) ??
+    (import.meta.env.VITE_COGNITO_DOMAIN as string | undefined);
   if (!raw) {
     throw new Error("Cognitoのドメイン設定がありません。envを確認してください。");
   }
@@ -35,11 +40,18 @@ function requireEnv(name: string): string {
 
 export const oidcConfig: UserManagerSettings = {
   authority: resolveAuthority(),
-  client_id: requireEnv("VITE_COGNITO_CLIENT_ID"),
-  redirect_uri: requireEnv("VITE_COGNITO_REDIRECT_URI"),
-  post_logout_redirect_uri: requireEnv("VITE_COGNITO_LOGOUT_URI"),
+  client_id:
+    (import.meta.env.VITE_ADMIN_CLIENT_ID as string | undefined) ??
+    requireEnv("VITE_COGNITO_CLIENT_ID"),
+  redirect_uri:
+    (import.meta.env.VITE_ADMIN_REDIRECT_URI as string | undefined) ??
+    requireEnv("VITE_COGNITO_REDIRECT_URI"),
+  post_logout_redirect_uri:
+    (import.meta.env.VITE_ADMIN_LOGOUT_URI as string | undefined) ??
+    requireEnv("VITE_COGNITO_LOGOUT_URI"),
   response_type: "code",
   scope:
+    (import.meta.env.VITE_ADMIN_SCOPES as string | undefined) ??
     (import.meta.env.VITE_COGNITO_SCOPES as string | undefined) ??
     "openid email phone",
   userStore: new WebStorageStateStore({ store: window.localStorage })
@@ -47,14 +59,36 @@ export const oidcConfig: UserManagerSettings = {
 
 function resolveScopes(): string {
   return (
+    (import.meta.env.VITE_ADMIN_SCOPES as string | undefined) ??
     (import.meta.env.VITE_COGNITO_SCOPES as string | undefined) ??
     "openid email phone"
   );
 }
 
+export function buildLogoutUrl(): string {
+  const clientId =
+    (import.meta.env.VITE_ADMIN_CLIENT_ID as string | undefined) ??
+    requireEnv("VITE_COGNITO_CLIENT_ID");
+  const logoutUri =
+    (import.meta.env.VITE_ADMIN_LOGOUT_URI as string | undefined) ??
+    requireEnv("VITE_COGNITO_LOGOUT_URI");
+  const domain = resolveHostedDomain();
+  const params = new URLSearchParams({
+    client_id: clientId,
+    logout_uri: logoutUri
+  });
+  const url = new URL("/logout", domain);
+  url.search = params.toString();
+  return url.toString();
+}
+
 export function buildSignupUrl(): string {
-  const clientId = requireEnv("VITE_COGNITO_CLIENT_ID");
-  const redirectUri = requireEnv("VITE_COGNITO_REDIRECT_URI");
+  const clientId =
+    (import.meta.env.VITE_ADMIN_CLIENT_ID as string | undefined) ??
+    requireEnv("VITE_COGNITO_CLIENT_ID");
+  const redirectUri =
+    (import.meta.env.VITE_ADMIN_REDIRECT_URI as string | undefined) ??
+    requireEnv("VITE_COGNITO_REDIRECT_URI");
   const domain = resolveHostedDomain();
   const params = new URLSearchParams({
     client_id: clientId,
@@ -63,19 +97,6 @@ export function buildSignupUrl(): string {
     scope: resolveScopes()
   });
   const url = new URL("/signup", domain);
-  url.search = params.toString();
-  return url.toString();
-}
-
-export function buildLogoutUrl(): string {
-  const clientId = requireEnv("VITE_COGNITO_CLIENT_ID");
-  const logoutUri = requireEnv("VITE_COGNITO_LOGOUT_URI");
-  const domain = resolveHostedDomain();
-  const params = new URLSearchParams({
-    client_id: clientId,
-    logout_uri: logoutUri
-  });
-  const url = new URL("/logout", domain);
   url.search = params.toString();
   return url.toString();
 }

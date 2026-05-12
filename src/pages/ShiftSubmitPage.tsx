@@ -5,6 +5,7 @@ import {
   submitAvailability,
   type SubmissionRole
 } from "../api/shiftApi";
+import { formatMonth, getMonthOptions } from "../utils/monthOptions";
 
 const days = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -127,7 +128,10 @@ const timeSlots = buildTimeSlots("09:00", "21:00", 30);
 export default function ShiftSubmitPage() {
   const auth = useAuth();
   const idToken = auth.user?.id_token;
-  const [selectedMonth, setSelectedMonth] = useState("2026-06");
+  const monthOptions = useMemo(() => getMonthOptions(), []);
+  const [selectedMonth, setSelectedMonth] = useState(
+    monthOptions[0] ?? formatMonth(new Date())
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [rolePreference, setRolePreference] = useState<SubmissionRole>("ホール");
   const [slotsByDate, setSlotsByDate] = useState<Record<string, string[]>>({});
@@ -155,7 +159,11 @@ export default function ShiftSubmitPage() {
     }
     let active = true;
     setIsLoading(true);
-    fetchSubmissions({ month: selectedMonth, token: idToken, scope: "self" })
+    fetchSubmissions({
+      month: selectedMonth,
+      token: idToken,
+      scope: "self"
+    })
       .then((items) => {
         if (!active) {
           return;
@@ -296,9 +304,11 @@ export default function ShiftSubmitPage() {
           onChange={(event) => setSelectedMonth(event.target.value)}
           disabled={isLoading || isSaving}
         >
-          <option>2026-06</option>
-          <option>2026-07</option>
-          <option>2026-08</option>
+          {monthOptions.map((month) => (
+            <option key={month} value={month}>
+              {month}
+            </option>
+          ))}
         </select>
         <select
           aria-label="担当可能な役割"

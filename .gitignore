@@ -1,1 +1,7 @@
 node_modules
+dist
+dist-admin
+infra/dist
+infra/cdk.out/.cache
+infra/cdk.out/asset.*
+tsconfig.tsbuildinfo

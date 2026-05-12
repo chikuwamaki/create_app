@@ -1,7 +1,14 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/shift-app-infra.ts",
   "context": {
-    "userPoolId": "ap-northeast-1_30APSJN3w",
-    "allowedOrigin": "http://localhost:5173"
+    "userPoolId": "ap-northeast-1_4ADnZ0SAa",
+    "budgetAlertEmail": "awakagan4@i.softbank.jp",
+    "budgetLimitUsd": 1,
+    "budgetAlertThresholdUsd": 0.01,
+    "budgetShutdownThresholdUsd": 0.01,
+    "stopApiLambda": true,
+    "wafRateLimit": 1000,
+    "apiThrottleRate": 20,
+    "apiThrottleBurst": 40
   }
 }
