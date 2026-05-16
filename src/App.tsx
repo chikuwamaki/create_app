@@ -29,9 +29,12 @@ export default function App() {
   const navItems = role ? navByRole[role] : [];
   const defaultRoute = role === "staff" ? "/submit" : "/create";
 
-  const handleLogout = () => {
-    auth.removeUser();
-    window.location.assign(buildLogoutUrl());
+  const handleLogout = async () => {
+    try {
+      await auth.removeUser();
+    } finally {
+      window.location.assign(buildLogoutUrl());
+    }
   };
 
   if (isCallbackRoute) {

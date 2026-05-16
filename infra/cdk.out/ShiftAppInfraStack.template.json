@@ -1,5 +1,916 @@
 {
  "Resources": {
+  "ShiftAppSiteBucket23CA8645": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "aws-cdk:cr-owned:b4e178e8",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteBucket/Resource"
+   }
+  },
+  "ShiftAppSiteBucketPolicy57907201": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "ShiftAppSiteBucket23CA8645"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAppSiteBucket23CA8645",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteBucket23CA8645",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAppSiteBucket23CA8645",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteBucket23CA8645",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ShiftAppSiteOAIC65072A2",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAppSiteBucket23CA8645",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteBucket23CA8645",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ShiftAppSiteOAIC65072A2",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ShiftAppSiteBucket23CA8645",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteBucket/Policy/Resource"
+   }
+  },
+  "ShiftAppSiteBucketAutoDeleteObjectsCustomResource01695EE7": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "ShiftAppSiteBucket23CA8645"
+    }
+   },
+   "DependsOn": [
+    "ShiftAppSiteBucketPolicy57907201"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "ShiftAppSiteBucket23CA8645"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "ShiftAppSiteOAIC65072A2": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "Allows CloudFront to reach the bucket"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteOAI/Resource"
+   }
+  },
+  "ShiftAppSiteDistribution29FDFA66": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CustomErrorResponses": [
+      {
+       "ErrorCachingMinTTL": 60,
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCachingMinTTL": 60,
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "ShiftAppInfraStackShiftAppSiteDistributionOrigin1ACF15CCF",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "ShiftAppSiteBucket23CA8645",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "ShiftAppInfraStackShiftAppSiteDistributionOrigin1ACF15CCF",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "ShiftAppSiteOAIC65072A2"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteDistribution/Resource"
+   }
+  },
+  "ShiftAppSiteDeploymentAwsCliLayer8FBBABA5": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "e2659170a0721541efa761a8d5d04d5e36cbbf691c4b15a9053002b7c825055d.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteDeployment/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.e2659170a0721541efa761a8d5d04d5e36cbbf691c4b15a9053002b7c825055d.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "ShiftAppSiteDeploymentCustomResource2B990241": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
+    ],
+    "SourceObjectKeys": [
+     "48066f6c831eef6d62db99f771a6bdf7ba1e238599ee59a9540ac2d0194d49fb.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "ShiftAppSiteBucket23CA8645"
+    },
+    "WaitForDistributionInvalidation": true,
+    "Prune": true,
+    "DistributionId": {
+     "Ref": "ShiftAppSiteDistribution29FDFA66"
+    },
+    "DistributionPaths": [
+     "/*"
+    ],
+    "OutputObjectKeys": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAppSiteDeployment/CustomResource/Default"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cdk-hnb659fds-assets-441751859687-ap-northeast-1"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":s3:::cdk-hnb659fds-assets-441751859687-ap-northeast-1/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAppSiteBucket23CA8645",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteBucket23CA8645",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "cloudfront:GetInvalidation",
+        "cloudfront:CreateInvalidation"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteBucket0B4DE2C9",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteBucket0B4DE2C9",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "Roles": [
+     {
+      "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+     }
+    },
+    "Handler": "index.handler",
+    "Layers": [
+     {
+      "Ref": "ShiftAppSiteDeploymentAwsCliLayer8FBBABA5"
+     }
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.13",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+    "aws:asset:path": "asset.3423a042b818e31c1e34a19d6689ab2e5f9b70fcbe9e71df66f241b20a200bd9",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ShiftAdminSiteBucket0B4DE2C9": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "aws-cdk:cr-owned:cef753c5",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteBucket/Resource"
+   }
+  },
+  "ShiftAdminSiteBucketPolicyDD6C26B5": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "ShiftAdminSiteBucket0B4DE2C9"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteBucket0B4DE2C9",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteBucket0B4DE2C9",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteBucket0B4DE2C9",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteBucket0B4DE2C9",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteOAIBE9FD4D8",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteBucket0B4DE2C9",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteBucket0B4DE2C9",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ShiftAdminSiteOAIBE9FD4D8",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ShiftAdminSiteBucket0B4DE2C9",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteBucket/Policy/Resource"
+   }
+  },
+  "ShiftAdminSiteBucketAutoDeleteObjectsCustomResourceE62DA483": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "ShiftAdminSiteBucket0B4DE2C9"
+    }
+   },
+   "DependsOn": [
+    "ShiftAdminSiteBucketPolicyDD6C26B5"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "ShiftAdminSiteOAIBE9FD4D8": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "Allows CloudFront to reach the bucket"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteOAI/Resource"
+   }
+  },
+  "ShiftAdminSiteDistribution5A12BCDC": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CustomErrorResponses": [
+      {
+       "ErrorCachingMinTTL": 60,
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCachingMinTTL": 60,
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "ShiftAppInfraStackShiftAdminSiteDistributionOrigin11E6CF9CB",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "ShiftAdminSiteBucket0B4DE2C9",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "ShiftAppInfraStackShiftAdminSiteDistributionOrigin11E6CF9CB",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "ShiftAdminSiteOAIBE9FD4D8"
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteDistribution/Resource"
+   }
+  },
+  "ShiftAdminSiteDeploymentAwsCliLayer1D9D12BA": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "e2659170a0721541efa761a8d5d04d5e36cbbf691c4b15a9053002b7c825055d.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteDeployment/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.e2659170a0721541efa761a8d5d04d5e36cbbf691c4b15a9053002b7c825055d.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "ShiftAdminSiteDeploymentCustomResourceB343D30A": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
+    ],
+    "SourceObjectKeys": [
+     "9d6ba367ab893f2d268f7c954b75e43ee050616c3b941b9613613b87c0035c6a.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "ShiftAdminSiteBucket0B4DE2C9"
+    },
+    "WaitForDistributionInvalidation": true,
+    "Prune": true,
+    "DistributionId": {
+     "Ref": "ShiftAdminSiteDistribution5A12BCDC"
+    },
+    "DistributionPaths": [
+     "/*"
+    ],
+    "OutputObjectKeys": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftAdminSiteDeployment/CustomResource/Default"
+   }
+  },
   "ShiftSubmissions68C29173": {
    "Type": "AWS::DynamoDB::Table",
    "Properties": {
@@ -23,7 +934,11 @@
       "AttributeName": "sk",
       "KeyType": "RANGE"
      }
-    ]
+    ],
+    "TimeToLiveSpecification": {
+     "AttributeName": "expiresAt",
+     "Enabled": true
+    }
    },
    "UpdateReplacePolicy": "Delete",
    "DeletionPolicy": "Delete",
@@ -127,14 +1042,36 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
-     "S3Key": "06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c.zip"
+     "S3Key": "19523153506a565597b17d880c96f88d24c405af259730a3e244723b02ccaaee.zip"
     },
     "Environment": {
      "Variables": {
       "TABLE_NAME": {
        "Ref": "ShiftSubmissions68C29173"
       },
-      "CORS_ORIGIN": "http://localhost:5173"
+      "CORS_ORIGINS": {
+       "Fn::Join": [
+        "",
+        [
+         "https://",
+         {
+          "Fn::GetAtt": [
+           "ShiftAppSiteDistribution29FDFA66",
+           "DomainName"
+          ]
+         },
+         ",https://",
+         {
+          "Fn::GetAtt": [
+           "ShiftAdminSiteDistribution5A12BCDC",
+           "DomainName"
+          ]
+         }
+        ]
+       ]
+      },
+      "USER_POOL_ID": "ap-northeast-1_4ADnZ0SAa",
+      "ADMIN_GROUP_NAME": "admins"
      }
     },
     "Handler": "index.handler",
@@ -152,9 +1089,500 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/Resource",
-    "aws:asset:path": "asset.06abb326b295778a05ffa7601c5450b832f07f07197df9650bbc33760ac3043c",
+    "aws:asset:path": "asset.19523153506a565597b17d880c96f88d24c405af259730a3e244723b02ccaaee",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
+   }
+  },
+  "BudgetShutdownTopic39E22CC2": {
+   "Type": "AWS::SNS::Topic",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownTopic/Resource"
+   }
+  },
+  "BudgetShutdownTopicPolicy7A008E27": {
+   "Type": "AWS::SNS::TopicPolicy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "SNS:Publish",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "budgets.amazonaws.com"
+       },
+       "Resource": {
+        "Ref": "BudgetShutdownTopic39E22CC2"
+       },
+       "Sid": "0"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Topics": [
+     {
+      "Ref": "BudgetShutdownTopic39E22CC2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownTopic/Policy/Resource"
+   }
+  },
+  "BudgetShutdownHandlerServiceRoleE3EB5360": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownHandler/ServiceRole/Resource"
+   }
+  },
+  "BudgetShutdownHandlerServiceRoleDefaultPolicy2261EEE4": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "cloudfront:GetDistributionConfig",
+        "cloudfront:UpdateDistribution"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":cloudfront::441751859687:distribution/",
+          {
+           "Ref": "ShiftAppSiteDistribution29FDFA66"
+          }
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BudgetShutdownHandlerServiceRoleDefaultPolicy2261EEE4",
+    "Roles": [
+     {
+      "Ref": "BudgetShutdownHandlerServiceRoleE3EB5360"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownHandler/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "BudgetShutdownHandler9D56861E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "90c66128b73bda7adf683560c1599692f1c1a708224a3c4223feabfc4ba99ba9.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DISTRIBUTION_ID": {
+       "Ref": "ShiftAppSiteDistribution29FDFA66"
+      },
+      "TARGET_FUNCTIONS": ""
+     }
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "BudgetShutdownHandlerServiceRoleE3EB5360",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "BudgetShutdownHandlerServiceRoleDefaultPolicy2261EEE4",
+    "BudgetShutdownHandlerServiceRoleE3EB5360"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownHandler/Resource",
+    "aws:asset:path": "asset.90c66128b73bda7adf683560c1599692f1c1a708224a3c4223feabfc4ba99ba9",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "BudgetShutdownHandlerAllowInvokeShiftAppInfraStackBudgetShutdownTopicD9A13C36840C574E": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "BudgetShutdownHandler9D56861E",
+      "Arn"
+     ]
+    },
+    "Principal": "sns.amazonaws.com",
+    "SourceArn": {
+     "Ref": "BudgetShutdownTopic39E22CC2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownHandler/AllowInvoke:ShiftAppInfraStackBudgetShutdownTopicD9A13C36"
+   }
+  },
+  "BudgetShutdownHandlerBudgetShutdownTopic368C6D4B": {
+   "Type": "AWS::SNS::Subscription",
+   "Properties": {
+    "Endpoint": {
+     "Fn::GetAtt": [
+      "BudgetShutdownHandler9D56861E",
+      "Arn"
+     ]
+    },
+    "Protocol": "lambda",
+    "TopicArn": {
+     "Ref": "BudgetShutdownTopic39E22CC2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/BudgetShutdownHandler/BudgetShutdownTopic/Resource"
+   }
+  },
+  "AdminUserPoolGroup": {
+   "Type": "AWS::Cognito::UserPoolGroup",
+   "Properties": {
+    "Description": "Admin access group",
+    "GroupName": "admins",
+    "UserPoolId": "ap-northeast-1_4ADnZ0SAa"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/AdminUserPoolGroup"
+   }
+  },
+  "PostConfirmationHandlerServiceRoleDA7D60E6": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/PostConfirmationHandler/ServiceRole/Resource"
+   }
+  },
+  "PostConfirmationHandlerServiceRoleDefaultPolicy4B891C44": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "cognito-idp:AdminUpdateUserAttributes",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_4ADnZ0SAa"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PostConfirmationHandlerServiceRoleDefaultPolicy4B891C44",
+    "Roles": [
+     {
+      "Ref": "PostConfirmationHandlerServiceRoleDA7D60E6"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/PostConfirmationHandler/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "PostConfirmationHandler8951DF10": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "adebd248c6c5addce9f374da8988f4ad4b394ca4c9ce7074f0b4fc843cdabf47.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "PostConfirmationHandlerServiceRoleDA7D60E6",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs18.x"
+   },
+   "DependsOn": [
+    "PostConfirmationHandlerServiceRoleDefaultPolicy4B891C44",
+    "PostConfirmationHandlerServiceRoleDA7D60E6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/PostConfirmationHandler/Resource",
+    "aws:asset:path": "asset.adebd248c6c5addce9f374da8988f4ad4b394ca4c9ce7074f0b4fc843cdabf47",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "PostConfirmationHandlerCognitoPostConfirmationInvokeBF4A7452": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "PostConfirmationHandler8951DF10",
+      "Arn"
+     ]
+    },
+    "Principal": "cognito-idp.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_4ADnZ0SAa"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/PostConfirmationHandler/CognitoPostConfirmationInvoke"
+   }
+  },
+  "AttachPostConfirmation3CFD478B": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"CognitoIdentityServiceProvider\",\"action\":\"updateUserPool\",\"parameters\":{\"UserPoolId\":\"ap-northeast-1_4ADnZ0SAa\",\"LambdaConfig\":{\"PostConfirmation\":\"",
+       {
+        "Fn::GetAtt": [
+         "PostConfirmationHandler8951DF10",
+         "Arn"
+        ]
+       },
+       "\"},\"AutoVerifiedAttributes\":[\"email\"],\"AttributesRequireVerificationBeforeUpdate\":[\"email\"]},\"physicalResourceId\":{\"id\":\"PostConfirmation-ap-northeast-1_4ADnZ0SAa\"}}"
+      ]
+     ]
+    },
+    "Update": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"CognitoIdentityServiceProvider\",\"action\":\"updateUserPool\",\"parameters\":{\"UserPoolId\":\"ap-northeast-1_4ADnZ0SAa\",\"LambdaConfig\":{\"PostConfirmation\":\"",
+       {
+        "Fn::GetAtt": [
+         "PostConfirmationHandler8951DF10",
+         "Arn"
+        ]
+       },
+       "\"},\"AutoVerifiedAttributes\":[\"email\"],\"AttributesRequireVerificationBeforeUpdate\":[\"email\"]},\"physicalResourceId\":{\"id\":\"PostConfirmation-ap-northeast-1_4ADnZ0SAa\"}}"
+      ]
+     ]
+    },
+    "InstallLatestAwsSdk": true
+   },
+   "DependsOn": [
+    "AttachPostConfirmationCustomResourcePolicyC982EA60"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/AttachPostConfirmation/Resource/Default"
+   }
+  },
+  "AttachPostConfirmationCustomResourcePolicyC982EA60": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "cognito-idp:UpdateUserPool",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AttachPostConfirmationCustomResourcePolicyC982EA60",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/AttachPostConfirmation/CustomResourcePolicy/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
+     "S3Key": "56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+    "aws:asset:path": "asset.56f7467bbde8a5efebcf57ae9e460027607099bab9f844669dcf5d800172ee5a",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "MonthlyBudget": {
+   "Type": "AWS::Budgets::Budget",
+   "Properties": {
+    "Budget": {
+     "BudgetLimit": {
+      "Amount": 1,
+      "Unit": "USD"
+     },
+     "BudgetName": "ShiftAppInfraStack-MonthlyBudget",
+     "BudgetType": "COST",
+     "TimeUnit": "MONTHLY"
+    },
+    "NotificationsWithSubscribers": [
+     {
+      "Notification": {
+       "ComparisonOperator": "GREATER_THAN",
+       "NotificationType": "ACTUAL",
+       "Threshold": 0.01,
+       "ThresholdType": "ABSOLUTE_VALUE"
+      },
+      "Subscribers": [
+       {
+        "Address": "awakagan4@i.softbank.jp",
+        "SubscriptionType": "EMAIL"
+       },
+       {
+        "Address": {
+         "Ref": "BudgetShutdownTopic39E22CC2"
+        },
+        "SubscriptionType": "SNS"
+       }
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/MonthlyBudget"
    }
   },
   "CognitoAuthorizerF3215DBC": {
@@ -171,7 +1599,7 @@
         {
          "Ref": "AWS::Partition"
         },
-        ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_30APSJN3w"
+        ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_4ADnZ0SAa"
        ]
       ]
      }
@@ -249,7 +1677,7 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Account"
    }
   },
-  "ShiftApiDeploymentE909B7A4700bad3f08d3c6e3146e3aa49ed25cc6": {
+  "ShiftApiDeploymentE909B7A41cd6401802acc486221f0cec74c36cfc": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Automatically created by the RestApi construct",
@@ -258,6 +1686,27 @@
     }
    },
    "DependsOn": [
+    "ShiftApiadminassignmentsGET8B14F734",
+    "ShiftApiadminassignmentsOPTIONSCF1781C6",
+    "ShiftApiadminassignmentsPOSTB5BFD028",
+    "ShiftApiadminassignmentsB8E19A6B",
+    "ShiftApiadminavailabilityGET18B84564",
+    "ShiftApiadminavailabilityOPTIONS44EE2B6C",
+    "ShiftApiadminavailabilityPOST831557FC",
+    "ShiftApiadminavailabilityC836A1B9",
+    "ShiftApiadminOPTIONS2D243EBF",
+    "ShiftApiadminpublishGET54CAA1B1",
+    "ShiftApiadminpublishOPTIONS851C6DA0",
+    "ShiftApiadminpublishPOST399EAC21",
+    "ShiftApiadminpublishBB8AC138",
+    "ShiftApiadmin0325B7AD",
+    "ShiftApiadminttlOPTIONSE0D6F3AB",
+    "ShiftApiadminttlPOST64410F85",
+    "ShiftApiadminttl421A7DD0",
+    "ShiftApiadminusersGETA6041914",
+    "ShiftApiadminusersOPTIONSD0FF8453",
+    "ShiftApiadminusersPOSTA38DFC18",
+    "ShiftApiadminusersC0A266F8",
     "ShiftApiassignmentsGET7B382AEC",
     "ShiftApiassignmentsOPTIONS2959A6F6",
     "ShiftApiassignmentsPOST622551FB",
@@ -283,8 +1732,17 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "ShiftApiDeploymentE909B7A4700bad3f08d3c6e3146e3aa49ed25cc6"
+     "Ref": "ShiftApiDeploymentE909B7A41cd6401802acc486221f0cec74c36cfc"
     },
+    "MethodSettings": [
+     {
+      "DataTraceEnabled": false,
+      "HttpMethod": "*",
+      "ResourcePath": "/*",
+      "ThrottlingBurstLimit": 40,
+      "ThrottlingRateLimit": 20
+     }
+    ],
     "RestApiId": {
      "Ref": "ShiftApi051B5FF2"
     },
@@ -308,9 +1766,40 @@
       {
        "ResponseParameters": {
         "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
-        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
         "method.response.header.Vary": "'Origin'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
        },
        "StatusCode": "204"
       }
@@ -374,9 +1863,40 @@
       {
        "ResponseParameters": {
         "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
-        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
         "method.response.header.Vary": "'Origin'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
        },
        "StatusCode": "204"
       }
@@ -657,9 +2177,40 @@
       {
        "ResponseParameters": {
         "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
-        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
         "method.response.header.Vary": "'Origin'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
        },
        "StatusCode": "204"
       }
@@ -940,9 +2491,40 @@
       {
        "ResponseParameters": {
         "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
-        "method.response.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
         "method.response.header.Vary": "'Origin'",
         "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
        },
        "StatusCode": "204"
       }
@@ -1194,11 +2776,1550 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/publish/POST/Resource"
    }
   },
+  "ShiftApiadmin0325B7AD": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ShiftApi051B5FF2",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "admin",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/Resource"
+   }
+  },
+  "ShiftApiadminOPTIONS2D243EBF": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminavailabilityC836A1B9": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "availability",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/Resource"
+   }
+  },
+  "ShiftApiadminavailabilityOPTIONS44EE2B6C": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadminavailabilityC836A1B9"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminavailabilityGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETadminavailability9A705D3D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/admin/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.availability"
+   }
+  },
+  "ShiftApiadminavailabilityGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETadminavailabilityAFD9E77D": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/admin/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.availability"
+   }
+  },
+  "ShiftApiadminavailabilityGET18B84564": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminavailabilityC836A1B9"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/GET/Resource"
+   }
+  },
+  "ShiftApiadminavailabilityPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTadminavailabilityF54A2CA7": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/admin/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.availability"
+   }
+  },
+  "ShiftApiadminavailabilityPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTadminavailability4AFCC49A": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/admin/availability"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.availability"
+   }
+  },
+  "ShiftApiadminavailabilityPOST831557FC": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminavailabilityC836A1B9"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/availability/POST/Resource"
+   }
+  },
+  "ShiftApiadminassignmentsB8E19A6B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "assignments",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/Resource"
+   }
+  },
+  "ShiftApiadminassignmentsOPTIONSCF1781C6": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadminassignmentsB8E19A6B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminassignmentsGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETadminassignments3B6FF48E": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/admin/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.assignments"
+   }
+  },
+  "ShiftApiadminassignmentsGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETadminassignments83FAACE6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/admin/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.assignments"
+   }
+  },
+  "ShiftApiadminassignmentsGET8B14F734": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminassignmentsB8E19A6B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/GET/Resource"
+   }
+  },
+  "ShiftApiadminassignmentsPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTadminassignments37EEB20C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/admin/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.assignments"
+   }
+  },
+  "ShiftApiadminassignmentsPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTadminassignmentsC00AE3F1": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/admin/assignments"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.assignments"
+   }
+  },
+  "ShiftApiadminassignmentsPOSTB5BFD028": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminassignmentsB8E19A6B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/assignments/POST/Resource"
+   }
+  },
+  "ShiftApiadminpublishBB8AC138": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "publish",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/Resource"
+   }
+  },
+  "ShiftApiadminpublishOPTIONS851C6DA0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadminpublishBB8AC138"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminpublishGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETadminpublishFEE28289": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/admin/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.publish"
+   }
+  },
+  "ShiftApiadminpublishGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETadminpublish44A23F1E": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/admin/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.publish"
+   }
+  },
+  "ShiftApiadminpublishGET54CAA1B1": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminpublishBB8AC138"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/GET/Resource"
+   }
+  },
+  "ShiftApiadminpublishPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTadminpublishE861093F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/admin/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.publish"
+   }
+  },
+  "ShiftApiadminpublishPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTadminpublish8E19A969": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/admin/publish"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.publish"
+   }
+  },
+  "ShiftApiadminpublishPOST399EAC21": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminpublishBB8AC138"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/publish/POST/Resource"
+   }
+  },
+  "ShiftApiadminusersC0A266F8": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "users",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/Resource"
+   }
+  },
+  "ShiftApiadminusersOPTIONSD0FF8453": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadminusersC0A266F8"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminusersGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETadminusers0063B898": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/admin/users"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.users"
+   }
+  },
+  "ShiftApiadminusersGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETadminusers7155BE85": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/admin/users"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.users"
+   }
+  },
+  "ShiftApiadminusersGETA6041914": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminusersC0A266F8"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/GET/Resource"
+   }
+  },
+  "ShiftApiadminusersPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTadminusersD840419F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/admin/users"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.users"
+   }
+  },
+  "ShiftApiadminusersPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTadminusersC3E28FBF": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/admin/users"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.users"
+   }
+  },
+  "ShiftApiadminusersPOSTA38DFC18": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminusersC0A266F8"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/POST/Resource"
+   }
+  },
+  "ShiftApiadminttl421A7DD0": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "ttl",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/ttl/Resource"
+   }
+  },
+  "ShiftApiadminttlOPTIONSE0D6F3AB": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadminttl421A7DD0"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/ttl/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadminttlPOSTApiPermissionShiftAppInfraStackShiftApiC61E34F7POSTadminttl841E9BCB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/POST/admin/ttl"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/ttl/POST/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.ttl"
+   }
+  },
+  "ShiftApiadminttlPOSTApiPermissionTestShiftAppInfraStackShiftApiC61E34F7POSTadminttlCD6A3248": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/POST/admin/ttl"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/ttl/POST/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.POST..admin.ttl"
+   }
+  },
+  "ShiftApiadminttlPOST64410F85": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadminttl421A7DD0"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/ttl/POST/Resource"
+   }
+  },
   "ShiftApiDefault4xxE8D84BF1": {
    "Type": "AWS::ApiGateway::GatewayResponse",
    "Properties": {
     "ResponseParameters": {
-     "gatewayresponse.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
      "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
      "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
     },
@@ -1215,7 +4336,7 @@
    "Type": "AWS::ApiGateway::GatewayResponse",
    "Properties": {
     "ResponseParameters": {
-     "gatewayresponse.header.Access-Control-Allow-Origin": "'http://localhost:5173'",
+     "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
      "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
      "gatewayresponse.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
     },
@@ -1228,10 +4349,98 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default5xx/Resource"
    }
   },
+  "ShiftApiWebAcl": {
+   "Type": "AWS::WAFv2::WebACL",
+   "Properties": {
+    "DefaultAction": {
+     "Allow": {}
+    },
+    "Rules": [
+     {
+      "Name": "AWSManagedCommonRuleSet",
+      "OverrideAction": {
+       "None": {}
+      },
+      "Priority": 0,
+      "Statement": {
+       "ManagedRuleGroupStatement": {
+        "Name": "AWSManagedRulesCommonRuleSet",
+        "VendorName": "AWS"
+       }
+      },
+      "VisibilityConfig": {
+       "CloudWatchMetricsEnabled": true,
+       "MetricName": "AWSManagedCommonRuleSet",
+       "SampledRequestsEnabled": true
+      }
+     },
+     {
+      "Action": {
+       "Block": {}
+      },
+      "Name": "RateLimit",
+      "Priority": 1,
+      "Statement": {
+       "RateBasedStatement": {
+        "AggregateKeyType": "IP",
+        "Limit": 1000
+       }
+      },
+      "VisibilityConfig": {
+       "CloudWatchMetricsEnabled": true,
+       "MetricName": "RateLimit",
+       "SampledRequestsEnabled": true
+      }
+     }
+    ],
+    "Scope": "REGIONAL",
+    "VisibilityConfig": {
+     "CloudWatchMetricsEnabled": true,
+     "MetricName": "ShiftApiWebAcl",
+     "SampledRequestsEnabled": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApiWebAcl"
+   }
+  },
+  "ShiftApiWebAclAssociation": {
+   "Type": "AWS::WAFv2::WebACLAssociation",
+   "Properties": {
+    "ResourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":apigateway:ap-northeast-1::/restapis/",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/stages/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       }
+      ]
+     ]
+    },
+    "WebACLArn": {
+     "Fn::GetAtt": [
+      "ShiftApiWebAcl",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApiWebAclAssociation"
+   }
+  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Q0W7CMAz8Ft5Dxsr4gMLEnrahsj2jNDXFpY2r2hnqqv77lJQNtKc7+3L2xYlOVolezMyF57Y4z2vM9bAXY8/KXPgwFL0zDRW5Hj5MXoPaHF0ko6pNkxfm4KiAivVbhK13VpCcQtPoIaPJEHFHNdo+lBMbFS8PhhmEdRpA8VKvvT2DrA3DdbweNkf3NzWYoWuQGcmNyrRYGoGL6fWwodKh0CdDtyOqOfVyog6/oQuuuyoDlrTFmOtGU2vJO1HP0NbUN+AkdO+qvZgyfmYiGTD5zkKM+gpyoiKIV/arXpdM/GWKmgG35Dhq/1rjeHPGk4Rd6Mrw9N1L62VU4dy64oev5Ek/rvRiVjHivPNOsAGdTfgDMCst7dUBAAA="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/6VUTW/bMAz9LctZ0bZku+zmOmgxoFuCpNsOxRDIMu0ysSVDpOJlhv/7IDkf3tpLsYv5aD7qPYuEZ3L2cSbfvVEtTXW+n1aYyW7DSu+Famnb0Vx2N17vgUVamAE9dpMaf6GZfJqM2wKf5jKWSA7UxLNdQAUMy2wHmmnSi//q/imG0spWqI9XT0P+CmdDw4YVQw3mlcaeN5993SiCXujK+rxw1rDslg5LNInWQPQ5B8PI0XcaOLeB8yJjgcQOM89oTaCP817QfNvl0FT2GPRPrhaXF0IRAZNMQuhFpeosV7JLC3OvjuC+g6Nw7AZNWQFbc+uNjkIXkBZmjFfgaiSK2qhq2a1tBaEQ43UYA+pFfjSqtnkmuweVDcwIzl62xuawI/k1hosSGZLdg21Qx44I4vOqME43PiPtsDm7HOe90LY0yFamhflG4FbWVnfO+kZkPi/D7cTlCVCoBkvF0Kqj7NKh7dxCiecn6/A3uCAxytZAnDQYb+EKE62tNyxGwwjTu2YbVmW8kAGsgax3GsLiiC/ATzYPxRM6V08iA74brK6BGmso1v551YtWFYdZnPgPyJL0XlxQQmQ1qnhHvUg9sa1flPm7tHL2gDm46DPuVfCPpjxPtAqbtVUt6Qpl0lJaYVy26zfoeODWnXKKrGf6S8+N516EDZE7enuYfZDvwy9qR4hT5w1jDXI9xD+6DxnuvwQAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "ShiftAppInfraStack/CDKMetadata/Default"
@@ -1286,6 +4495,38 @@
   "TableName": {
    "Value": {
     "Ref": "ShiftSubmissions68C29173"
+   }
+  },
+  "SiteUrl": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "ShiftAppSiteDistribution29FDFA66",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "AdminSiteUrl": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "ShiftAdminSiteDistribution5A12BCDC",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
    }
   }
  },

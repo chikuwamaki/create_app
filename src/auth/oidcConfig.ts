@@ -33,11 +33,19 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function normalizeRootUri(value: string): string {
+  const url = new URL(value);
+  if (url.pathname === "/") {
+    url.pathname = "";
+  }
+  return url.toString().replace(/\/$/, "");
+}
+
 export const oidcConfig: UserManagerSettings = {
   authority: resolveAuthority(),
   client_id: requireEnv("VITE_COGNITO_CLIENT_ID"),
   redirect_uri: requireEnv("VITE_COGNITO_REDIRECT_URI"),
-  post_logout_redirect_uri: requireEnv("VITE_COGNITO_LOGOUT_URI"),
+  post_logout_redirect_uri: normalizeRootUri(requireEnv("VITE_COGNITO_LOGOUT_URI")),
   response_type: "code",
   scope:
     (import.meta.env.VITE_COGNITO_SCOPES as string | undefined) ??
@@ -69,7 +77,7 @@ export function buildSignupUrl(): string {
 
 export function buildLogoutUrl(): string {
   const clientId = requireEnv("VITE_COGNITO_CLIENT_ID");
-  const logoutUri = requireEnv("VITE_COGNITO_LOGOUT_URI");
+  const logoutUri = normalizeRootUri(requireEnv("VITE_COGNITO_LOGOUT_URI"));
   const domain = resolveHostedDomain();
   const params = new URLSearchParams({
     client_id: clientId,

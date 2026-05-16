@@ -26,8 +26,11 @@ export default function App() {
   const auth = useAuth();
 
   const handleLogout = async () => {
-    await auth.removeUser();
-    window.location.assign(buildLogoutUrl());
+    try {
+      await auth.removeUser();
+    } finally {
+      window.location.assign(buildLogoutUrl());
+    }
   };
 
   return (

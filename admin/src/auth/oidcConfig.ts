@@ -38,6 +38,14 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function normalizeRootUri(value: string): string {
+  const url = new URL(value);
+  if (url.pathname === "/") {
+    url.pathname = "";
+  }
+  return url.toString().replace(/\/$/, "");
+}
+
 export const oidcConfig: UserManagerSettings = {
   authority: resolveAuthority(),
   client_id:
@@ -46,9 +54,10 @@ export const oidcConfig: UserManagerSettings = {
   redirect_uri:
     (import.meta.env.VITE_ADMIN_REDIRECT_URI as string | undefined) ??
     requireEnv("VITE_COGNITO_REDIRECT_URI"),
-  post_logout_redirect_uri:
+  post_logout_redirect_uri: normalizeRootUri(
     (import.meta.env.VITE_ADMIN_LOGOUT_URI as string | undefined) ??
-    requireEnv("VITE_COGNITO_LOGOUT_URI"),
+      requireEnv("VITE_COGNITO_LOGOUT_URI")
+  ),
   response_type: "code",
   scope:
     (import.meta.env.VITE_ADMIN_SCOPES as string | undefined) ??
@@ -69,9 +78,10 @@ export function buildLogoutUrl(): string {
   const clientId =
     (import.meta.env.VITE_ADMIN_CLIENT_ID as string | undefined) ??
     requireEnv("VITE_COGNITO_CLIENT_ID");
-  const logoutUri =
+  const logoutUri = normalizeRootUri(
     (import.meta.env.VITE_ADMIN_LOGOUT_URI as string | undefined) ??
-    requireEnv("VITE_COGNITO_LOGOUT_URI");
+      requireEnv("VITE_COGNITO_LOGOUT_URI")
+  );
   const domain = resolveHostedDomain();
   const params = new URLSearchParams({
     client_id: clientId,

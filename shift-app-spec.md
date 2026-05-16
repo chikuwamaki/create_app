@@ -149,11 +149,90 @@
 - Publishing Service: 公開状態管理
 - Notification Service: 公開通知やリマインド（将来拡張）
 
-## AWS構成（最小）
-- フロント: S3 + CloudFront
-- 認証: Cognito
-- API: API Gateway + Lambda
-- データ: DynamoDB
+## AWS構成（CDK実装ベース）
+
+### 全体構成図
+```mermaid
+flowchart LR
+  staff[バイト用ブラウザ] --> cfSite[CloudFront: ShiftAppSiteDistribution]
+  manager[店長/管理者ブラウザ] --> cfAdmin[CloudFront: ShiftAdminSiteDistribution]
+
+  cfSite --> siteBucket[S3: ShiftAppSiteBucket\n静的サイト dist]
+  cfAdmin --> adminBucket[S3: ShiftAdminSiteBucket\n管理画面 dist-admin]
+
+  staff --> cognito[Cognito User Pool\n既存User Poolを参照]
+  manager --> cognito
+
+  staff --> api[API Gateway REST API\nCognito Authorizer]
+  manager --> api
+
+  waf[AWS WAF Web ACL\nCommonRuleSet + IP RateLimit] --> api
+  api --> handler[Lambda: ShiftSubmissionHandler]
+  handler --> table[DynamoDB: ShiftSubmissions\npk/sk + TTL expiresAt]
+  handler --> cognito
+
+  cognito --> postConfirm[Lambda: PostConfirmationHandler\ncustom:role未設定ならstaff付与]
+
+  budget[AWS Budgets\nMonthlyBudget] --> email[Email通知]
+  budget --> sns[SNS: BudgetShutdownTopic]
+  sns --> shutdown[Lambda: BudgetShutdownHandler]
+  shutdown --> cfSite
+  shutdown --> handler
+```
+
+### フロントエンド
+- バイト向け画面は `dist` を S3 にデプロイし、CloudFront から配信する。
+- 管理画面は `dist-admin` を別 S3 にデプロイし、別 CloudFront から配信する。
+- S3 バケットは公開せず、CloudFront の Origin Access Identity 経由で読み取る。
+- SPA 対応として CloudFront の 403/404 は `/index.html` に返す。
+
+### 認証・認可
+- Cognito User Pool は CDK の `userPoolId` context で既存プールを参照する。
+- API Gateway は Cognito User Pools Authorizer で保護する。
+- 管理者判定は Cognito group の `admins`（contextで変更可）を使う。
+- `PostConfirmationHandler` が Cognito の Post Confirmation トリガーとして設定され、`custom:role` が未設定のユーザーに `staff` を付与する。
+
+### API・業務ロジック
+- API Gateway REST API が `/availability`, `/assignments`, `/publish`, `/admin/*` を公開する。
+- すべての主要 API は `ShiftSubmissionHandler` Lambda に統合される。
+- CORS はバイト向け CloudFront URL と管理画面 CloudFront URL を許可する。
+- API Gateway の stage には throttling rate/burst を設定する。
+
+### データストア
+- DynamoDB は単一テーブル `ShiftSubmissions` を使う。
+- Partition Key は `pk`、Sort Key は `sk`。
+- 月単位データを `pk = YYYY-MM` に集約し、`sk` で `SUBMISSION#...`, `ASSIGNMENT#...`, `PUBLISH` を分ける。
+- TTL 属性は `expiresAt`。現在の Lambda 実装では 12ヶ月後の期限を設定する。
+- Billing Mode は Pay per request。
+
+### セキュリティ・保護
+- API Gateway stage に AWS WAF の Regional Web ACL を関連付ける。
+- WAF には AWS Managed Common Rule Set と IP ベース RateLimit を設定する。
+- S3 は Block Public Access、SSL 強制。
+- Lambda には必要な DynamoDB/Cognito/CloudFront/Lambda 権限を IAM Policy で付与する。
+
+### コスト監視・停止
+- AWS Budgets で月次コスト予算を作成する。
+- 予算しきい値を超えるとメール通知と SNS 通知を行う。
+- SNS 通知を受けた `BudgetShutdownHandler` が CloudFront distribution を無効化する。
+- `stopApiLambda=true` の場合、API Lambda の reserved concurrency を 0 にして API 実行も止める。
+
+### デプロイ context
+- `userPoolId`: 必須。既存 Cognito User Pool ID。
+- `budgetAlertEmail`: 必須。予算通知先メール。
+- `allowedOrigin`: 任意。バイト向け画面の CORS origin。
+- `adminAllowedOrigin`: 任意。管理画面の CORS origin。
+- `adminGroupName`: 任意。既定は `admins`。
+- `budgetLimitUsd`: 任意。既定は `1`。
+- `budgetAlertThresholdUsd`: 任意。既定は `0.01`。
+- `stopApiLambda`: 任意。既定は `true`。
+- `wafRateLimit`: 任意。既定は `1000`。
+- `apiThrottleRate`: 任意。既定は `20`。
+- `apiThrottleBurst`: 任意。既定は `40`。
+
+### 注意事項
+- `budgetShutdownThresholdUsd` は context として定義されているが、現在の CDK 実装では Budget notification のしきい値に使われていない。
+- CDK の removal policy は主要リソースで `DESTROY` が使われているため、本番運用では保持ポリシーの見直しが必要。
 
 ## データ設計（シンプル案）
 - users
