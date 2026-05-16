@@ -3,6 +3,7 @@ import { useAuth } from "react-oidc-context";
 import {
   fetchAssignments,
   fetchPublishState,
+  fetchSubmissions,
   type Assignment,
   type PublishState
 } from "../api/shiftApi";
@@ -233,7 +234,10 @@ export default function ShiftListPage() {
         }
         setPublishState(state);
         if (state.status === "published") {
-          return fetchAssignments({ month: selectedMonth, token: idToken });
+          return Promise.all([
+            fetchAssignments({ month: selectedMonth, token: idToken }),
+            fetchSubmissions({ month: selectedMonth, token: idToken })
+          ]);
         }
         return null;
       })
@@ -241,8 +245,19 @@ export default function ShiftListPage() {
         if (!active) {
           return;
         }
-        if (result && result.status === "published") {
-          setAssignments(result.items);
+        if (result && result[0].status === "published") {
+          const [, submissions] = result;
+          const staffNames = new Map(
+            submissions.map((submission) => [submission.userId, submission.name])
+          );
+          setAssignments(
+            result[0].items
+              .filter((assignment) => staffNames.has(assignment.staffId))
+              .map((assignment) => ({
+                ...assignment,
+                staffName: staffNames.get(assignment.staffId) ?? assignment.staffName
+              }))
+          );
         } else {
           setAssignments([]);
         }

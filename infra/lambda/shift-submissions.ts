@@ -896,6 +896,7 @@ export const handler = async (event: any) => {
 
         return {
           username: user.Username,
+          userId: attributes.sub,
           enabled: user.Enabled ?? false,
           status: user.UserStatus,
           email: attributes.email,

@@ -107,53 +107,26 @@ function formatSelectedDate(dateKey: string): string {
 
 const timeSlots = buildTimeSlots("09:00", "21:00", 30);
 
-function normalizeAssignments(raw: unknown): AssignmentsByDate {
-  if (!raw || typeof raw !== "object") {
-    return {};
-  }
-
-  const normalized: AssignmentsByDate = {};
-  Object.entries(raw as Record<string, any>).forEach(([date, rolesByDate]) => {
-    if (!rolesByDate || typeof rolesByDate !== "object") {
+function assignmentsFromApi(assignments: ApiAssignment[]): AssignmentsByDate {
+  const next: AssignmentsByDate = {};
+  assignments.forEach((assignment) => {
+    if (!roles.includes(assignment.role as RoleKey)) {
       return;
     }
-
-    roles.forEach((role) => {
-      const times = rolesByDate[role];
-      if (!times || typeof times !== "object") {
-        return;
-      }
-
-      Object.entries(times as Record<string, any>).forEach(([time, value]) => {
-        if (!value || typeof value !== "object") {
-          return;
-        }
-
-        const slot: AssignmentSlot = {};
-        if (typeof value.staffId === "string") {
-          slot[value.staffId] = { staffId: value.staffId };
-        } else {
-          Object.entries(value as Record<string, any>).forEach(
-            ([staffId, assignment]) => {
-              if (typeof assignment?.staffId === "string") {
-                slot[staffId] = { staffId: assignment.staffId };
-              }
-            }
-          );
-        }
-
-        if (Object.keys(slot).length) {
-          normalized[date] =
-            normalized[date] ??
-            ({} as Record<RoleKey, Record<string, AssignmentSlot>>);
-          normalized[date][role] = normalized[date][role] ?? {};
-          normalized[date][role][time] = slot;
-        }
-      });
-    });
+    const role = assignment.role as RoleKey;
+    const day = next[assignment.date] ?? {};
+    const roleAssignments = day[role] ?? {};
+    const slotAssignments = roleAssignments[assignment.time] ?? {};
+    roleAssignments[assignment.time] = {
+      ...slotAssignments,
+      [assignment.staffId]: { staffId: assignment.staffId }
+    };
+    next[assignment.date] = {
+      ...day,
+      [role]: roleAssignments
+    };
   });
-
-  return normalized;
+  return next;
 }
 
 export default function ShiftCreatePage() {
@@ -165,17 +138,9 @@ export default function ShiftCreatePage() {
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<RoleKey>("ホール");
-  const [assignmentsByDate, setAssignmentsByDate] = useState<AssignmentsByDate>(() => {
-    const raw = localStorage.getItem("shift-assignments");
-    if (!raw) {
-      return {};
-    }
-    try {
-      return normalizeAssignments(JSON.parse(raw));
-    } catch {
-      return {};
-    }
-  });
+  const [assignmentsByDate, setAssignmentsByDate] = useState<AssignmentsByDate>(
+    {}
+  );
   const [notice, setNotice] = useState<Notice>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -197,13 +162,6 @@ export default function ShiftCreatePage() {
       prev && prev.startsWith(selectedMonth) ? prev : firstDate
     );
   }, [selectedMonth]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "shift-assignments",
-      JSON.stringify(assignmentsByDate)
-    );
-  }, [assignmentsByDate]);
 
   useEffect(() => {
     if (!notice) {
@@ -255,37 +213,13 @@ export default function ShiftCreatePage() {
           return null;
         }
         setPublishState(state);
-        if (state.status === "published") {
-          return fetchAssignments({ month: selectedMonth, token: idToken });
-        }
-        return null;
+        return fetchAssignments({ month: selectedMonth, token: idToken });
       })
       .then((result) => {
-        if (!active || !result || result.status !== "published") {
+        if (!active || !result) {
           return;
         }
-        setAssignmentsByDate((prev) => {
-          const next = { ...prev };
-          Object.keys(next).forEach((date) => {
-            if (date.startsWith(selectedMonth)) {
-              delete next[date];
-            }
-          });
-          result.items.forEach((assignment) => {
-            const day = next[assignment.date] ?? {};
-            const roleAssignments = day[assignment.role] ?? {};
-            const slotAssignments = roleAssignments[assignment.time] ?? {};
-            roleAssignments[assignment.time] = {
-              ...slotAssignments,
-              [assignment.staffId]: { staffId: assignment.staffId }
-            };
-            next[assignment.date] = {
-              ...day,
-              [assignment.role]: roleAssignments
-            };
-          });
-          return next;
-        });
+        setAssignmentsByDate(assignmentsFromApi(result.items));
       })
       .catch((err) => {
         if (active) {

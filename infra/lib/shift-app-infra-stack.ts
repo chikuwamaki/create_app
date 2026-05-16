@@ -230,6 +230,19 @@ export class ShiftAppInfraStack extends Stack {
 
     table.grantReadWriteData(handler);
 
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          "cognito-idp:AdminAddUserToGroup",
+          "cognito-idp:AdminListGroupsForUser",
+          "cognito-idp:AdminRemoveUserFromGroup",
+          "cognito-idp:AdminUpdateUserAttributes",
+          "cognito-idp:ListUsers"
+        ],
+        resources: [userPool.userPoolArn]
+      })
+    );
+
     new cognito.CfnUserPoolGroup(this, "AdminUserPoolGroup", {
       userPoolId: userPool.userPoolId,
       groupName: adminGroupName,

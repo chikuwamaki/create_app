@@ -29,6 +29,7 @@ export type AdminPublish = {
 
 export type AdminUser = {
   username?: string;
+  userId?: string;
   enabled: boolean;
   status?: string;
   email?: string;

@@ -132,11 +132,12 @@ select {
 
 .admin-main > div,
 .panel {
-  width: min(980px, 100%);
+  width: min(1180px, 100%);
   background: var(--panel);
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 24px;
-  box-shadow: 0 10px 30px rgba(16, 24, 38, 0.08);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 18px rgba(16, 24, 38, 0.06);
 }
 
 .admin-main h2,
@@ -159,6 +160,19 @@ select {
   font-weight: 600;
 }
 
+.admin-editor {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.admin-editor h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
 .hint {
   margin: 8px 0 16px;
   font-size: 13px;
@@ -169,6 +183,7 @@ select {
   width: 100%;
   border-collapse: collapse;
   background: #ffffff;
+  table-layout: auto;
 }
 
 .simple-table th,
@@ -182,6 +197,19 @@ select {
 .simple-table th {
   color: var(--ink-soft);
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.simple-table button + button {
+  margin-left: 6px;
+}
+
+.muted-id {
+  margin-top: 3px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .notice {

@@ -3,26 +3,49 @@ import { useAuth } from "react-oidc-context";
 import {
   deleteAdminPublishState,
   fetchAdminPublish,
+  fetchAdminUsers,
   setAdminPublishState,
+  type AdminUser,
   type AdminPublish
 } from "../api/adminApi";
-import { monthOptions } from "../utils/monthOptions";
+import { defaultOperationalMonth, monthOptions } from "../utils/monthOptions";
 
 const months = monthOptions({ past: 12, future: 3 });
 
 export default function PublishPage() {
   const auth = useAuth();
   const token = auth.user?.id_token || auth.user?.access_token || "";
-  const [month, setMonth] = useState(months[months.length - 1].value);
+  const initialMonth = defaultOperationalMonth();
+  const [month, setMonth] = useState(
+    months.some((item) => item.value === initialMonth)
+      ? initialMonth
+      : months[months.length - 1].value
+  );
   const [state, setState] = useState<AdminPublish | null>(null);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+
+  const publishedByUser = users.find(
+    (user) =>
+      user.username === state?.publishedBy || user.userId === state?.publishedBy
+  );
+  const publishedByLabel = publishedByUser
+    ? publishedByUser.name || publishedByUser.email || publishedByUser.username
+    : state?.publishedBy;
 
   const load = async () => {
     setLoading(true);
     setNotice(null);
     try {
-      setState(await fetchAdminPublish({ month, token }));
+      const publishState = await fetchAdminPublish({ month, token });
+      setState(publishState);
+      try {
+        const userResult = await fetchAdminUsers({ token, limit: 50 });
+        setUsers(userResult.users);
+      } catch {
+        setUsers([]);
+      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : String(error));
     } finally {
@@ -112,7 +135,12 @@ export default function PublishPage() {
           </tr>
           <tr>
             <th>公開者</th>
-            <td>{state?.publishedBy ?? "-"}</td>
+            <td>
+              {publishedByLabel ?? "-"}
+              {state?.publishedBy ? (
+                <div className="muted-id">{state.publishedBy}</div>
+              ) : null}
+            </td>
           </tr>
         </tbody>
       </table>

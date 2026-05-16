@@ -7,14 +7,19 @@ import {
   purgeOldData,
   type AdminDataSummary
 } from "../api/adminApi";
-import { monthOptions } from "../utils/monthOptions";
+import { defaultOperationalMonth, monthOptions } from "../utils/monthOptions";
 
 const months = monthOptions({ past: 24, future: 3 });
 
 export default function TtlPage() {
   const auth = useAuth();
   const token = auth.user?.id_token || auth.user?.access_token || "";
-  const [targetMonth, setTargetMonth] = useState(months[months.length - 1].value);
+  const initialMonth = defaultOperationalMonth();
+  const [targetMonth, setTargetMonth] = useState(
+    months.some((item) => item.value === initialMonth)
+      ? initialMonth
+      : months[months.length - 1].value
+  );
   const [cutoffMonth, setCutoffMonth] = useState(months[12]?.value ?? months[0].value);
   const [summary, setSummary] = useState<AdminDataSummary | null>(null);
   const [loading, setLoading] = useState(false);

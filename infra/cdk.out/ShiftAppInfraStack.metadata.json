@@ -40,7 +40,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:233:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:246:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -55,7 +55,7 @@
         "Annotations.addWarningV2 (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:1087)",
         "new AwsCustomResource2 (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\node_modules\\aws-cdk-lib\\custom-resources\\lib\\aws-custom-resource\\aws-custom-resource.js:1:8694)",
         "new AwsCustomResource2 (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:855)",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:261:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:274:5)",
         "Object.<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "Module._compile (node:internal/modules/cjs/loader:1761:14)",
         "Module.m._compile (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\node_modules\\ts-node\\src\\index.ts:1618:23)",
@@ -99,7 +99,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:297:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:310:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -113,7 +113,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:347:20)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:360:20)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -127,7 +127,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:391:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:404:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -141,7 +141,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:498:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:511:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -155,7 +155,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:499:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:512:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -169,7 +169,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:500:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:513:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -183,7 +183,7 @@
     {
       "type": "aws:cdk:creationStack",
       "data": [
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:503:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:516:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -446,7 +446,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new NodejsFunction in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:239:37)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:252:37)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -461,7 +461,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...NodejsFunction.addPermission in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:256:29)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:269:29)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -476,7 +476,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new AwsCustomResource2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:261:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:274:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -491,7 +491,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new CognitoUserPoolsAuthorizer2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:329:24)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:342:24)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -506,7 +506,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -521,7 +521,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -536,7 +536,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -771,7 +771,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new NodejsFunction in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:239:37)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:252:37)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -786,7 +786,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new AwsCustomResource2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:261:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:274:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -801,7 +801,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new AwsCustomResource2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:261:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:274:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -816,7 +816,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new AwsCustomResource2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:261:5)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:274:5)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -831,7 +831,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -846,7 +846,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -861,7 +861,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -876,7 +876,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addGatewayResponse in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:402:9)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:415:9)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -891,7 +891,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addGatewayResponse in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:407:9)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:420:9)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -953,7 +953,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...NodejsFunction.addToRolePolicy in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:249:29)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:262:29)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -968,7 +968,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...new RestApi2 in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:335:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:348:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -983,7 +983,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:412:35)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:425:35)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -998,7 +998,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:413:34)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:426:34)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1013,7 +1013,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:414:30)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:427:30)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1028,7 +1028,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:415:28)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:428:28)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1043,7 +1043,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:412:35)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:425:35)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1058,7 +1058,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:423:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:436:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1073,7 +1073,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:423:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:436:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1088,7 +1088,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:423:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:436:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1103,7 +1103,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:428:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:441:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1118,7 +1118,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:428:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:441:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1133,7 +1133,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:428:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:441:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1148,7 +1148,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:413:34)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:426:34)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1163,7 +1163,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:433:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:446:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1178,7 +1178,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:433:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:446:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1193,7 +1193,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:433:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:446:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1208,7 +1208,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:438:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:451:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1223,7 +1223,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:438:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:451:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1238,7 +1238,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:438:17)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:451:17)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1253,7 +1253,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:414:30)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:427:30)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1268,7 +1268,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:443:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:456:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1283,7 +1283,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:443:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:456:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1298,7 +1298,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:443:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:456:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1313,7 +1313,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:448:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:461:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1328,7 +1328,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:448:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:461:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1343,7 +1343,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:448:13)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:461:13)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1358,7 +1358,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...RootResource.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:415:28)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:428:28)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1373,7 +1373,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:416:37)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:429:37)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1388,7 +1388,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:417:36)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:430:36)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1403,7 +1403,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:418:32)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:431:32)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1418,7 +1418,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:419:30)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:432:30)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1433,7 +1433,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:420:28)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:433:28)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1448,7 +1448,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:416:37)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:429:37)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1463,7 +1463,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:453:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:466:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1478,7 +1478,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:453:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:466:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1493,7 +1493,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:453:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:466:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1508,7 +1508,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:458:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:471:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1523,7 +1523,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:458:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:471:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1538,7 +1538,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:458:23)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:471:23)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1553,7 +1553,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:417:36)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:430:36)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1568,7 +1568,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:463:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:476:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1583,7 +1583,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:463:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:476:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1598,7 +1598,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:463:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:476:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1613,7 +1613,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:468:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:481:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1628,7 +1628,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:468:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:481:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1643,7 +1643,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:468:22)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:481:22)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1658,7 +1658,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:418:32)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:431:32)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1673,7 +1673,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:473:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:486:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1688,7 +1688,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:473:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:486:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1703,7 +1703,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:473:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:486:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1718,7 +1718,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:478:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:491:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1733,7 +1733,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:478:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:491:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1748,7 +1748,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:478:18)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:491:18)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1763,7 +1763,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:419:30)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:432:30)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1778,7 +1778,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:483:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:496:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1793,7 +1793,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:483:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:496:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1808,7 +1808,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:483:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:496:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1823,7 +1823,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:488:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:501:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1838,7 +1838,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:488:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:501:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1853,7 +1853,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:488:16)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:501:16)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1868,7 +1868,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addResource in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:420:28)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:433:28)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1883,7 +1883,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:493:14)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:506:14)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1898,7 +1898,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:493:14)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:506:14)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]
@@ -1913,7 +1913,7 @@
       "type": "aws:cdk:creationStack",
       "data": [
         "...WrappedClass.addMethod in aws-cdk-lib...",
-        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:493:14)",
+        "new ShiftAppInfraStack (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\lib\\shift-app-infra-stack.ts:506:14)",
         "<anonymous> (C:\\Users\\admin\\Documents\\GitHub\\create_app\\infra\\bin\\shift-app-infra.ts:43:1)",
         "...node internals, ts-node, ts-node, ts-node..."
       ]

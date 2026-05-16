@@ -363,7 +363,7 @@
      "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
     ],
     "SourceObjectKeys": [
-     "48066f6c831eef6d62db99f771a6bdf7ba1e238599ee59a9540ac2d0194d49fb.zip"
+     "0cadbd4a368c28861814afc95b96bd70022c948a6bbaf910489365311cd74f06.zip"
     ],
     "DestinationBucketName": {
      "Ref": "ShiftAppSiteBucket23CA8645"
@@ -890,7 +890,7 @@
      "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
     ],
     "SourceObjectKeys": [
-     "9d6ba367ab893f2d268f7c954b75e43ee050616c3b941b9613613b87c0035c6a.zip"
+     "52020b8604193c7cc2581119ee51fb1c6054c9dfab0935f6f8a4b7df18dfa3e7.zip"
     ],
     "DestinationBucketName": {
      "Ref": "ShiftAdminSiteBucket0B4DE2C9"
@@ -1022,6 +1022,28 @@
          ]
         }
        ]
+      },
+      {
+       "Action": [
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminRemoveUserFromGroup",
+        "cognito-idp:AdminUpdateUserAttributes",
+        "cognito-idp:ListUsers"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":cognito-idp:ap-northeast-1:441751859687:userpool/ap-northeast-1_4ADnZ0SAa"
+         ]
+        ]
+       }
       }
      ],
      "Version": "2012-10-17"
@@ -1042,7 +1064,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
-     "S3Key": "19523153506a565597b17d880c96f88d24c405af259730a3e244723b02ccaaee.zip"
+     "S3Key": "53b9ed1c62e1a13ae4669904136dc0fbf97c36a675a5a279d02139f25311421d.zip"
     },
     "Environment": {
      "Variables": {
@@ -1089,7 +1111,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/Resource",
-    "aws:asset:path": "asset.19523153506a565597b17d880c96f88d24c405af259730a3e244723b02ccaaee",
+    "aws:asset:path": "asset.53b9ed1c62e1a13ae4669904136dc0fbf97c36a675a5a279d02139f25311421d",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }

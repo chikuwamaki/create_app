@@ -18,6 +18,18 @@ export function buildMonthOptions(options: MonthOptions = {}): string[] {
   return months;
 }
 
+export function formatMonth(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+export function defaultOperationalMonth(baseDate = new Date()): string {
+  return formatMonth(
+    new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 1)
+  );
+}
+
 export function monthOptions(options: MonthOptions = {}) {
   return buildMonthOptions(options).map((value) => ({
     value,
