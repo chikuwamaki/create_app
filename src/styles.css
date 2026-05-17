@@ -318,16 +318,12 @@ body {
 
 .time-grid-header {
   display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 6px;
   font-weight: 600;
   color: var(--ink-soft);
 }
 
 .time-row {
   display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 6px;
   align-items: center;
 }
 
@@ -351,9 +347,16 @@ body {
   border: 1px dashed #d6d4cf;
   background: #ffffff;
   border-radius: 8px;
-  height: 32px;
+  min-height: 42px;
   cursor: pointer;
   width: 100%;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  text-align: left;
 }
 
 .time-slot:hover {
@@ -363,6 +366,20 @@ body {
 .time-slot--selected {
   background: #f7d488;
   border-color: #f7d488;
+}
+
+.time-slot-range {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.time-slot-state {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #101826;
+  color: #f8f6f1;
+  font-size: 12px;
+  padding: 3px 8px;
 }
 
 .slot-summary {
@@ -439,6 +456,8 @@ body {
 .assignment-time-cell {
   font-size: 13px;
   color: var(--ink-soft);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .assignment-staff-cell {

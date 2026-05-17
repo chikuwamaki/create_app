@@ -99,6 +99,10 @@ function formatSelectedDate(dateKey: string): string {
   return `${month}/${day}(${days[date.getDay()]})`;
 }
 
+function formatSlotRange(time: string, intervalMinutes: number): string {
+  return `${time}-${toTime(toMinutes(time) + intervalMinutes)}`;
+}
+
 function formatDateLabel(dateKey: string): string {
   const [, month, day] = dateKey.split("-").map(Number);
   return `${month.toString().padStart(2, "0")}/${day
@@ -399,10 +403,10 @@ export default function ShiftListPage() {
               <div
                 className="assignment-row assignment-row--header"
                 style={{
-                  gridTemplateColumns: `72px repeat(${roles.length}, minmax(0, 1fr))`
+                  gridTemplateColumns: `112px repeat(${roles.length}, minmax(0, 1fr))`
                 }}
               >
-                <div className="assignment-time-cell">時間</div>
+                <div className="assignment-time-cell">時間帯</div>
                 {roles.map((role) => (
                   <div key={role} className="assignment-staff-cell">
                     {role}
@@ -414,10 +418,12 @@ export default function ShiftListPage() {
                   key={time}
                   className="assignment-row"
                   style={{
-                    gridTemplateColumns: `72px repeat(${roles.length}, minmax(0, 1fr))`
+                    gridTemplateColumns: `112px repeat(${roles.length}, minmax(0, 1fr))`
                   }}
                 >
-                  <div className="assignment-time-cell">{time}</div>
+                  <div className="assignment-time-cell">
+                    {formatSlotRange(time, SLOT_MINUTES)}
+                  </div>
                   {roles.map((role) => {
                     const names = assignmentsByRole[role]?.[time] ?? [];
                     return (

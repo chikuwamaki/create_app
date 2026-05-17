@@ -166,7 +166,6 @@ flowchart LR
   staff --> api[API Gateway REST API\nCognito Authorizer]
   manager --> api
 
-  waf[AWS WAF Web ACL\nCommonRuleSet + IP RateLimit] --> api
   api --> handler[Lambda: ShiftSubmissionHandler]
   handler --> table[DynamoDB: ShiftSubmissions\npk/sk + TTL expiresAt]
   handler --> cognito
@@ -178,6 +177,8 @@ flowchart LR
   sns --> shutdown[Lambda: BudgetShutdownHandler]
   shutdown --> cfSite
   shutdown --> handler
+
+  optWaf[AWS WAF Web ACL\nenableWaf=true の時だけ作成] -.-> api
 ```
 
 ### フロントエンド
@@ -191,6 +192,7 @@ flowchart LR
 - API Gateway は Cognito User Pools Authorizer で保護する。
 - 管理者判定は Cognito group の `admins`（contextで変更可）を使う。
 - `PostConfirmationHandler` が Cognito の Post Confirmation トリガーとして設定され、`custom:role` が未設定のユーザーに `staff` を付与する。
+- Cognito の標準機能により、パスワード認証の失敗が累積するとユーザー単位で一時ロックアウトされる。5回失敗後からロックアウトが始まり、追加失敗ごとに待機時間が伸び、最大約15分になる。
 
 ### API・業務ロジック
 - API Gateway REST API が `/availability`, `/assignments`, `/publish`, `/admin/*` を公開する。
@@ -206,8 +208,9 @@ flowchart LR
 - Billing Mode は Pay per request。
 
 ### セキュリティ・保護
-- API Gateway stage に AWS WAF の Regional Web ACL を関連付ける。
-- WAF には AWS Managed Common Rule Set と IP ベース RateLimit を設定する。
+- AWS WAF は現在無効。必要になった場合は `enableWaf=true` で API Gateway stage に Regional Web ACL を再作成できる。
+- WAF を有効化した場合は AWS Managed Common Rule Set と IP ベース RateLimit を設定する。
+- WAF 無効時の主な保護は Cognito 認証、Cognito の失敗ロック、管理者グループ制限、API Gateway throttling、Budget 通知で行う。
 - S3 は Block Public Access、SSL 強制。
 - Lambda には必要な DynamoDB/Cognito/CloudFront/Lambda 権限を IAM Policy で付与する。
 
@@ -226,7 +229,8 @@ flowchart LR
 - `budgetLimitUsd`: 任意。既定は `1`。
 - `budgetAlertThresholdUsd`: 任意。既定は `0.01`。
 - `stopApiLambda`: 任意。既定は `true`。
-- `wafRateLimit`: 任意。既定は `1000`。
+- `enableWaf`: 任意。既定は `false`。`true` にすると AWS WAF を作成・関連付けする。
+- `wafRateLimit`: 任意。既定は `1000`。`enableWaf=true` の時に使用する。
 - `apiThrottleRate`: 任意。既定は `20`。
 - `apiThrottleBurst`: 任意。既定は `40`。
 

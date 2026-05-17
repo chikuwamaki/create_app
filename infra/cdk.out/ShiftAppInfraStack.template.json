@@ -363,7 +363,7 @@
      "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
     ],
     "SourceObjectKeys": [
-     "0cadbd4a368c28861814afc95b96bd70022c948a6bbaf910489365311cd74f06.zip"
+     "46133fbc295d609596bbf72d2586bd1481d1b74047ce127fe6488bb7ae0cdd80.zip"
     ],
     "DestinationBucketName": {
      "Ref": "ShiftAppSiteBucket23CA8645"
@@ -890,7 +890,7 @@
      "cdk-hnb659fds-assets-441751859687-ap-northeast-1"
     ],
     "SourceObjectKeys": [
-     "52020b8604193c7cc2581119ee51fb1c6054c9dfab0935f6f8a4b7df18dfa3e7.zip"
+     "6b3d7c1b1c56bf22e3a82a87b07ca04a35666dca08405fd1cf41ab30d099a308.zip"
     ],
     "DestinationBucketName": {
      "Ref": "ShiftAdminSiteBucket0B4DE2C9"
@@ -1044,6 +1044,16 @@
          ]
         ]
        }
+      },
+      {
+       "Action": "ce:GetCostAndUsage",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "cloudwatch:GetMetricStatistics",
+       "Effect": "Allow",
+       "Resource": "*"
       }
      ],
      "Version": "2012-10-17"
@@ -1064,7 +1074,7 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-441751859687-ap-northeast-1",
-     "S3Key": "53b9ed1c62e1a13ae4669904136dc0fbf97c36a675a5a279d02139f25311421d.zip"
+     "S3Key": "e67e6d79be5ab5fcc3dc9286a5cea1ef386308c61265226f94e34c5126b217cc.zip"
     },
     "Environment": {
      "Variables": {
@@ -1093,17 +1103,27 @@
        ]
       },
       "USER_POOL_ID": "ap-northeast-1_4ADnZ0SAa",
-      "ADMIN_GROUP_NAME": "admins"
+      "ADMIN_GROUP_NAME": "admins",
+      "WAF_ENABLED": "false",
+      "LAMBDA_MEMORY_MB": "128",
+      "SITE_DISTRIBUTION_ID": {
+       "Ref": "ShiftAppSiteDistribution29FDFA66"
+      },
+      "ADMIN_DISTRIBUTION_ID": {
+       "Ref": "ShiftAdminSiteDistribution5A12BCDC"
+      }
      }
     },
     "Handler": "index.handler",
+    "MemorySize": 128,
     "Role": {
      "Fn::GetAtt": [
       "ShiftSubmissionHandlerServiceRole3388AC6D",
       "Arn"
      ]
     },
-    "Runtime": "nodejs18.x"
+    "Runtime": "nodejs18.x",
+    "Timeout": 20
    },
    "DependsOn": [
     "ShiftSubmissionHandlerServiceRoleDefaultPolicyB645710B",
@@ -1111,7 +1131,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "ShiftAppInfraStack/ShiftSubmissionHandler/Resource",
-    "aws:asset:path": "asset.53b9ed1c62e1a13ae4669904136dc0fbf97c36a675a5a279d02139f25311421d",
+    "aws:asset:path": "asset.e67e6d79be5ab5fcc3dc9286a5cea1ef386308c61265226f94e34c5126b217cc",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -1699,7 +1719,7 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Account"
    }
   },
-  "ShiftApiDeploymentE909B7A41cd6401802acc486221f0cec74c36cfc": {
+  "ShiftApiDeploymentE909B7A49e045443304eae7ca469afcb4f846ba2": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Automatically created by the RestApi construct",
@@ -1716,6 +1736,9 @@
     "ShiftApiadminavailabilityOPTIONS44EE2B6C",
     "ShiftApiadminavailabilityPOST831557FC",
     "ShiftApiadminavailabilityC836A1B9",
+    "ShiftApiadmincostGET820CD9EA",
+    "ShiftApiadmincostOPTIONS1CFE1317",
+    "ShiftApiadmincost66EBAD8B",
     "ShiftApiadminOPTIONS2D243EBF",
     "ShiftApiadminpublishGET54CAA1B1",
     "ShiftApiadminpublishOPTIONS851C6DA0",
@@ -1754,7 +1777,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "ShiftApiDeploymentE909B7A41cd6401802acc486221f0cec74c36cfc"
+     "Ref": "ShiftApiDeploymentE909B7A49e045443304eae7ca469afcb4f846ba2"
     },
     "MethodSettings": [
      {
@@ -4136,6 +4159,207 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/users/POST/Resource"
    }
   },
+  "ShiftApiadmincost66EBAD8B": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "ShiftApiadmin0325B7AD"
+    },
+    "PathPart": "cost",
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/cost/Resource"
+   }
+  },
+  "ShiftApiadmincostOPTIONS1CFE1317": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+        "method.response.header.Access-Control-Allow-Origin": {
+         "Fn::Join": [
+          "",
+          [
+           "'https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAppSiteDistribution29FDFA66",
+             "DomainName"
+            ]
+           },
+           "'"
+          ]
+         ]
+        },
+        "method.response.header.Vary": "'Origin'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "ResponseTemplates": {
+        "application/json": {
+         "Fn::Join": [
+          "",
+          [
+           "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"https://",
+           {
+            "Fn::GetAtt": [
+             "ShiftAdminSiteDistribution5A12BCDC",
+             "DomainName"
+            ]
+           },
+           "\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
+          ]
+         ]
+        }
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Vary": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ShiftApiadmincost66EBAD8B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/cost/OPTIONS/Resource"
+   }
+  },
+  "ShiftApiadmincostGETApiPermissionShiftAppInfraStackShiftApiC61E34F7GETadmincost2A8AE730": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/",
+       {
+        "Ref": "ShiftApiDeploymentStageprod18F22251"
+       },
+       "/GET/admin/cost"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/cost/GET/ApiPermission.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.cost"
+   }
+  },
+  "ShiftApiadmincostGETApiPermissionTestShiftAppInfraStackShiftApiC61E34F7GETadmincostAA9C61A9": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ShiftSubmissionHandlerC0B57CDE",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:ap-northeast-1:441751859687:",
+       {
+        "Ref": "ShiftApi051B5FF2"
+       },
+       "/test-invoke-stage/GET/admin/cost"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/cost/GET/ApiPermission.Test.ShiftAppInfraStackShiftApiC61E34F7.GET..admin.cost"
+   }
+  },
+  "ShiftApiadmincostGET820CD9EA": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "COGNITO_USER_POOLS",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizerF3215DBC"
+    },
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "ShiftSubmissionHandlerC0B57CDE",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "ShiftApiadmincost66EBAD8B"
+    },
+    "RestApiId": {
+     "Ref": "ShiftApi051B5FF2"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default/admin/cost/GET/Resource"
+   }
+  },
   "ShiftApiadminttl421A7DD0": {
    "Type": "AWS::ApiGateway::Resource",
    "Properties": {
@@ -4371,98 +4595,10 @@
     "aws:cdk:path": "ShiftAppInfraStack/ShiftApi/Default5xx/Resource"
    }
   },
-  "ShiftApiWebAcl": {
-   "Type": "AWS::WAFv2::WebACL",
-   "Properties": {
-    "DefaultAction": {
-     "Allow": {}
-    },
-    "Rules": [
-     {
-      "Name": "AWSManagedCommonRuleSet",
-      "OverrideAction": {
-       "None": {}
-      },
-      "Priority": 0,
-      "Statement": {
-       "ManagedRuleGroupStatement": {
-        "Name": "AWSManagedRulesCommonRuleSet",
-        "VendorName": "AWS"
-       }
-      },
-      "VisibilityConfig": {
-       "CloudWatchMetricsEnabled": true,
-       "MetricName": "AWSManagedCommonRuleSet",
-       "SampledRequestsEnabled": true
-      }
-     },
-     {
-      "Action": {
-       "Block": {}
-      },
-      "Name": "RateLimit",
-      "Priority": 1,
-      "Statement": {
-       "RateBasedStatement": {
-        "AggregateKeyType": "IP",
-        "Limit": 1000
-       }
-      },
-      "VisibilityConfig": {
-       "CloudWatchMetricsEnabled": true,
-       "MetricName": "RateLimit",
-       "SampledRequestsEnabled": true
-      }
-     }
-    ],
-    "Scope": "REGIONAL",
-    "VisibilityConfig": {
-     "CloudWatchMetricsEnabled": true,
-     "MetricName": "ShiftApiWebAcl",
-     "SampledRequestsEnabled": true
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "ShiftAppInfraStack/ShiftApiWebAcl"
-   }
-  },
-  "ShiftApiWebAclAssociation": {
-   "Type": "AWS::WAFv2::WebACLAssociation",
-   "Properties": {
-    "ResourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":apigateway:ap-northeast-1::/restapis/",
-       {
-        "Ref": "ShiftApi051B5FF2"
-       },
-       "/stages/",
-       {
-        "Ref": "ShiftApiDeploymentStageprod18F22251"
-       }
-      ]
-     ]
-    },
-    "WebACLArn": {
-     "Fn::GetAtt": [
-      "ShiftApiWebAcl",
-      "Arn"
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "ShiftAppInfraStack/ShiftApiWebAclAssociation"
-   }
-  },
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/6VUTW/bMAz9LctZ0bZku+zmOmgxoFuCpNsOxRDIMu0ysSVDpOJlhv/7IDkf3tpLsYv5aD7qPYuEZ3L2cSbfvVEtTXW+n1aYyW7DSu+Famnb0Vx2N17vgUVamAE9dpMaf6GZfJqM2wKf5jKWSA7UxLNdQAUMy2wHmmnSi//q/imG0spWqI9XT0P+CmdDw4YVQw3mlcaeN5993SiCXujK+rxw1rDslg5LNInWQPQ5B8PI0XcaOLeB8yJjgcQOM89oTaCP817QfNvl0FT2GPRPrhaXF0IRAZNMQuhFpeosV7JLC3OvjuC+g6Nw7AZNWQFbc+uNjkIXkBZmjFfgaiSK2qhq2a1tBaEQ43UYA+pFfjSqtnkmuweVDcwIzl62xuawI/k1hosSGZLdg21Qx44I4vOqME43PiPtsDm7HOe90LY0yFamhflG4FbWVnfO+kZkPi/D7cTlCVCoBkvF0Kqj7NKh7dxCiecn6/A3uCAxytZAnDQYb+EKE62tNyxGwwjTu2YbVmW8kAGsgax3GsLiiC/ATzYPxRM6V08iA74brK6BGmso1v551YtWFYdZnPgPyJL0XlxQQmQ1qnhHvUg9sa1flPm7tHL2gDm46DPuVfCPpjxPtAqbtVUt6Qpl0lJaYVy26zfoeODWnXKKrGf6S8+N516EDZE7enuYfZDvwy9qR4hT5w1jDXI9xD+6DxnuvwQAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/6VUwW7bMAz9luWsaFuyXXZzHbQYsC1B0u0yFIEsMy4TWTJEqllm+N8HyUnsrb0Uu5iPIp/eg0h4JmcfZ/LdG3WkqS4PU4OFbDes9EGoI21bmsv2JugDsMh3tkc/20mNv9BOPk3GtNhPc5lKJPvWLLBbgAGGZbEHzTTpxH+xH0RfWjmD+jR46vNXOOsJG1YMNdhXGntOvvi6UQSd0MaFcuedZdkuPVZoM62B6HMJlpGT7zz23MaeFzsWSOyxCIzOxvZx3gmab9sSGuNOUf/sanE9EIoImGQWQyeMqotSyTbf2S/qBP4HeIrXbtBWBtjZ22B1ErqCfGfHeAW+RqKkjaqW7doZiIUUh2H0qBPlyaralYVs71XRdyZw8bK1roQ9yW8pXJXIkmzvXYM6MRJI30FhnG5CQdpjc3E5zjuhXWWRncx39juBXzln7rwLjShCWcXXScsToVANVorhqE6yzXvahUJZ4Efn8Tf4KDHK1kCcNZheYYCZ1i5YFqNhxOkN2YZVlR6kB2sgF7yGuDjiK/CjK2PxjC7Vs0iP73qra6DGWUq1f466TuSB2NUv8v8urbx7whJ8MpAWJhpDW11GZeLKbNWRtEGZHSk3mLZoMKfThVt/zil1PdNfBm4CdyKOXu7p7dPsg3wf/z17Qpz6YBlrkOs+/gEWCeJQmAQAAA=="
    },
    "Metadata": {
     "aws:cdk:path": "ShiftAppInfraStack/CDKMetadata/Default"

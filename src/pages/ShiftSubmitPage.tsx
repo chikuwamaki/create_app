@@ -117,6 +117,11 @@ function buildRanges(slots: string[], intervalMinutes: number): string[] {
   return ranges;
 }
 
+function formatSlotRange(time: string, intervalMinutes: number): string {
+  const start = parseTimeToMinutes(time);
+  return `${time}-${formatMinutes(start + intervalMinutes)}`;
+}
+
 function formatSelectedDate(dateKey: string): string {
   const [year, month, day] = dateKey.split("-").map(Number);
   const date = new Date(year, month - 1, day);
@@ -384,12 +389,10 @@ export default function ShiftSubmitPage() {
           <h3>時間グリッド（30分）</h3>
           <div className="time-grid">
             <div className="time-grid-header">
-              <div className="time-label">時間</div>
               <div className="time-day">{selectedDateLabel}</div>
             </div>
             {timeSlots.map((time) => (
               <div key={time} className="time-row">
-                <div className="time-label">{time}</div>
                 <button
                   className={
                     selectedSlots.includes(time)
@@ -397,13 +400,20 @@ export default function ShiftSubmitPage() {
                       : "time-slot"
                   }
                   type="button"
-                  aria-label={`${selectedDateLabel} ${time} を選択`}
+                  aria-label={`${selectedDateLabel} ${formatSlotRange(time, 30)} を選択`}
                   onPointerDown={(event) => {
                     event.preventDefault();
                     startDrag(time);
                   }}
                   onPointerEnter={() => dragOver(time)}
-                />
+                >
+                  <span className="time-slot-range">
+                    {formatSlotRange(time, 30)}
+                  </span>
+                  {selectedSlots.includes(time) ? (
+                    <span className="time-slot-state">選択中</span>
+                  ) : null}
+                </button>
               </div>
             ))}
           </div>

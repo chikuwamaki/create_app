@@ -18,6 +18,7 @@ const budgetShutdownThresholdUsd = Number(
 );
 const stopApiLambda =
   (app.node.tryGetContext("stopApiLambda") ?? "true") === "true";
+const enableWaf = (app.node.tryGetContext("enableWaf") ?? "false") === "true";
 const wafRateLimit = Number(app.node.tryGetContext("wafRateLimit") ?? "1000");
 const apiThrottleRate = Number(
   app.node.tryGetContext("apiThrottleRate") ?? "20"
@@ -54,6 +55,7 @@ new ShiftAppInfraStack(app, "ShiftAppInfraStack", {
   budgetAlertThresholdUsd,
   budgetShutdownThresholdUsd,
   stopApiLambda,
+  enableWaf,
   wafRateLimit,
   apiThrottleRate,
   apiThrottleBurst

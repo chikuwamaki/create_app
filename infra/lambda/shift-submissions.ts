@@ -16,12 +16,26 @@ import {
   CognitoIdentityProviderClient,
   ListUsersCommand
 } from "@aws-sdk/client-cognito-identity-provider";
+import {
+  CostExplorerClient,
+  GetCostAndUsageCommand
+} from "@aws-sdk/client-cost-explorer";
+import {
+  CloudWatchClient,
+  GetMetricStatisticsCommand
+} from "@aws-sdk/client-cloudwatch";
 
 const TABLE_NAME = process.env.TABLE_NAME;
 const CORS_ORIGINS =
   process.env.CORS_ORIGINS ?? process.env.CORS_ORIGIN ?? "*";
 const USER_POOL_ID = process.env.USER_POOL_ID;
 const ADMIN_GROUP_NAME = process.env.ADMIN_GROUP_NAME ?? "admins";
+const FUNCTION_NAME =
+  process.env.FUNCTION_NAME ?? process.env.AWS_LAMBDA_FUNCTION_NAME;
+const LAMBDA_MEMORY_MB = Number(process.env.LAMBDA_MEMORY_MB ?? "128");
+const SITE_DISTRIBUTION_ID = process.env.SITE_DISTRIBUTION_ID;
+const ADMIN_DISTRIBUTION_ID = process.env.ADMIN_DISTRIBUTION_ID;
+const WAF_ENABLED = process.env.WAF_ENABLED === "true";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client, {
@@ -30,9 +44,30 @@ const docClient = DynamoDBDocumentClient.from(client, {
   }
 });
 const cognitoClient = new CognitoIdentityProviderClient({});
+const costExplorerClient = new CostExplorerClient({ region: "us-east-1" });
+const cloudWatchClient = new CloudWatchClient({});
+const cloudWatchGlobalClient = new CloudWatchClient({ region: "us-east-1" });
 const TTL_MONTHS = 12;
 const SUBMISSION_ROLES = ["ホール", "キッチン", "どちらでも"] as const;
 const ASSIGNMENT_ROLES = ["ホール", "キッチン"] as const;
+
+const PRICING = {
+  currency: "USD",
+  usdToJpy: 156,
+  lambdaRequestPerMillion: 0.2,
+  lambdaGbSecond: 0.0000166667,
+  apiGatewayRestRequestPerMillion: 3.5,
+  dynamoReadUnitPerMillion: 0.155,
+  dynamoWriteUnitPerMillion: 0.78,
+  cloudFrontRequestPerTenThousand: 0.01,
+  cloudFrontDataTransferPerGb: 0.114,
+  wafWebAclMonthly: 5,
+  wafRuleMonthly: 1,
+  wafRequestPerMillion: 0.6,
+  wafWebAclCount: 1,
+  wafRuleCount: 2,
+  label: "ap-northeast-1の概算単価。CloudFrontは日本向け配信の目安。"
+} as const;
 
 type SubmissionItem = {
   pk: string;
@@ -215,6 +250,273 @@ function getRecentMonths(count: number, baseDate = new Date()): string[] {
     months.push(`${year}-${month}`);
   }
   return months;
+}
+
+function formatCostDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = `${date.getUTCMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getUTCDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getMonthCostWindow(baseDate = new Date()) {
+  const start = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), baseDate.getUTCDate() + 1));
+  const monthEnd = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() + 1, 1));
+  const elapsedDays = Math.max(
+    1,
+    Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000))
+  );
+  const daysInMonth = Math.ceil(
+    (monthEnd.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)
+  );
+  return {
+    start: formatCostDate(start),
+    end: formatCostDate(end),
+    elapsedDays,
+    daysInMonth
+  };
+}
+
+type MetricDimension = {
+  Name: string;
+  Value: string;
+};
+
+async function getMetricSum(params: {
+  cloudWatch: CloudWatchClient;
+  namespace: string;
+  metricName: string;
+  dimensions: MetricDimension[];
+  startTime: Date;
+  endTime: Date;
+  period?: number;
+}): Promise<number> {
+  if (params.dimensions.some((dimension) => !dimension.Value)) {
+    return 0;
+  }
+
+  const result = await params.cloudWatch.send(
+    new GetMetricStatisticsCommand({
+      Namespace: params.namespace,
+      MetricName: params.metricName,
+      Dimensions: params.dimensions,
+      StartTime: params.startTime,
+      EndTime: params.endTime,
+      Period: params.period ?? 3600,
+      Statistics: ["Sum"]
+    })
+  );
+
+  return (result.Datapoints ?? []).reduce(
+    (total, point) => total + (point.Sum ?? 0),
+    0
+  );
+}
+
+function roundCost(value: number): number {
+  return Number(value.toFixed(8));
+}
+
+function buildEstimateService(params: {
+  service: string;
+  amountUsd: number;
+  usage: number;
+  unit: string;
+  detail: string;
+}) {
+  return {
+    service: params.service,
+    amountUsd: roundCost(Math.max(0, params.amountUsd)),
+    usage: Math.round(params.usage * 100) / 100,
+    unit: params.unit,
+    detail: params.detail
+  };
+}
+
+async function buildRealtimeCostEstimate(costWindow: ReturnType<typeof getMonthCostWindow>) {
+  const startTime = new Date(`${costWindow.start}T00:00:00Z`);
+  const endTime = new Date();
+  const elapsedHours = Math.max(
+    1,
+    (endTime.getTime() - startTime.getTime()) / (60 * 60 * 1000)
+  );
+  const monthHours = costWindow.daysInMonth * 24;
+  const cloudFrontDistributionIds = [
+    SITE_DISTRIBUTION_ID,
+    ADMIN_DISTRIBUTION_ID
+  ].filter(Boolean) as string[];
+
+  const [
+    lambdaInvocations,
+    lambdaDurationMs,
+    dynamoReadUnits,
+    dynamoWriteUnits,
+    cloudFrontRequests,
+    cloudFrontBytesDownloaded
+  ] = await Promise.all([
+    FUNCTION_NAME
+      ? getMetricSum({
+          cloudWatch: cloudWatchClient,
+          namespace: "AWS/Lambda",
+          metricName: "Invocations",
+          dimensions: [{ Name: "FunctionName", Value: FUNCTION_NAME }],
+          startTime,
+          endTime
+        })
+      : Promise.resolve(0),
+    FUNCTION_NAME
+      ? getMetricSum({
+          cloudWatch: cloudWatchClient,
+          namespace: "AWS/Lambda",
+          metricName: "Duration",
+          dimensions: [{ Name: "FunctionName", Value: FUNCTION_NAME }],
+          startTime,
+          endTime
+        })
+      : Promise.resolve(0),
+    TABLE_NAME
+      ? getMetricSum({
+          cloudWatch: cloudWatchClient,
+          namespace: "AWS/DynamoDB",
+          metricName: "ConsumedReadCapacityUnits",
+          dimensions: [{ Name: "TableName", Value: TABLE_NAME }],
+          startTime,
+          endTime
+        })
+      : Promise.resolve(0),
+    TABLE_NAME
+      ? getMetricSum({
+          cloudWatch: cloudWatchClient,
+          namespace: "AWS/DynamoDB",
+          metricName: "ConsumedWriteCapacityUnits",
+          dimensions: [{ Name: "TableName", Value: TABLE_NAME }],
+          startTime,
+          endTime
+        })
+      : Promise.resolve(0),
+    Promise.all(
+      cloudFrontDistributionIds.map((distributionId) =>
+        getMetricSum({
+          cloudWatch: cloudWatchGlobalClient,
+          namespace: "AWS/CloudFront",
+          metricName: "Requests",
+          dimensions: [
+            { Name: "DistributionId", Value: distributionId },
+            { Name: "Region", Value: "Global" }
+          ],
+          startTime,
+          endTime
+        })
+      )
+    ).then((values) => values.reduce((total, value) => total + value, 0)),
+    Promise.all(
+      cloudFrontDistributionIds.map((distributionId) =>
+        getMetricSum({
+          cloudWatch: cloudWatchGlobalClient,
+          namespace: "AWS/CloudFront",
+          metricName: "BytesDownloaded",
+          dimensions: [
+            { Name: "DistributionId", Value: distributionId },
+            { Name: "Region", Value: "Global" }
+          ],
+          startTime,
+          endTime
+        })
+      )
+    ).then((values) => values.reduce((total, value) => total + value, 0))
+  ]);
+
+  const lambdaGbSeconds =
+    (lambdaDurationMs / 1000) * (LAMBDA_MEMORY_MB / 1024);
+  const lambdaCost =
+    (lambdaInvocations / 1_000_000) * PRICING.lambdaRequestPerMillion +
+    lambdaGbSeconds * PRICING.lambdaGbSecond;
+  const apiGatewayCost =
+    (lambdaInvocations / 1_000_000) *
+    PRICING.apiGatewayRestRequestPerMillion;
+  const dynamoCost =
+    (dynamoReadUnits / 1_000_000) * PRICING.dynamoReadUnitPerMillion +
+    (dynamoWriteUnits / 1_000_000) * PRICING.dynamoWriteUnitPerMillion;
+  const cloudFrontGb = cloudFrontBytesDownloaded / 1024 / 1024 / 1024;
+  const cloudFrontCost =
+    (cloudFrontRequests / 10_000) * PRICING.cloudFrontRequestPerTenThousand +
+    cloudFrontGb * PRICING.cloudFrontDataTransferPerGb;
+  const services = [
+    buildEstimateService({
+      service: "AWS Lambda",
+      amountUsd: lambdaCost,
+      usage: lambdaInvocations,
+      unit: "invocations",
+      detail: `${Math.round(lambdaGbSeconds * 100) / 100} GB-seconds`
+    }),
+    buildEstimateService({
+      service: "Amazon API Gateway",
+      amountUsd: apiGatewayCost,
+      usage: lambdaInvocations,
+      unit: "estimated requests",
+      detail: "Lambda呼び出し数からREST APIリクエスト数を推定"
+    }),
+    buildEstimateService({
+      service: "Amazon DynamoDB",
+      amountUsd: dynamoCost,
+      usage: dynamoReadUnits + dynamoWriteUnits,
+      unit: "capacity units",
+      detail: `${Math.round(dynamoReadUnits * 100) / 100} read / ${Math.round(
+        dynamoWriteUnits * 100
+      ) / 100} write`
+    }),
+    buildEstimateService({
+      service: "Amazon CloudFront",
+      amountUsd: cloudFrontCost,
+      usage: cloudFrontRequests,
+      unit: "requests",
+      detail: `${Math.round(cloudFrontGb * 10000) / 10000} GB downloaded`
+    })
+  ];
+
+  if (WAF_ENABLED) {
+    const wafRequests = lambdaInvocations;
+    const wafVariableCost =
+      (wafRequests / 1_000_000) * PRICING.wafRequestPerMillion;
+    const wafFixedMonthToDateCost =
+      ((PRICING.wafWebAclMonthly * PRICING.wafWebAclCount +
+        PRICING.wafRuleMonthly * PRICING.wafRuleCount) *
+        elapsedHours) /
+      monthHours;
+    const wafCost = wafFixedMonthToDateCost + wafVariableCost;
+    services.push(
+      buildEstimateService({
+        service: "AWS WAF",
+        amountUsd: wafCost,
+        usage: wafRequests,
+        unit: "estimated inspected requests",
+        detail: "Web ACL 1個、ルール2個の月額固定費を時間按分"
+      })
+    );
+  }
+
+  services.sort((a, b) => b.amountUsd - a.amountUsd);
+
+  const estimatedUsd = roundCost(
+    services.reduce((total, item) => total + item.amountUsd, 0)
+  );
+  const projectedUsd = roundCost((estimatedUsd / elapsedHours) * monthHours);
+
+  return {
+    source: "CloudWatch",
+    periodStart: costWindow.start,
+    periodEnd: endTime.toISOString(),
+    elapsedHours: Math.round(elapsedHours * 100) / 100,
+    monthHours,
+    estimatedUsd,
+    projectedUsd,
+    services,
+    pricing: PRICING,
+    wafEnabled: WAF_ENABLED,
+    note:
+      "CloudWatch metrics are near-real-time usage signals. This is an estimate and may differ from the final AWS bill."
+  };
 }
 
 function mapItem(item: SubmissionItem) {
@@ -972,6 +1274,63 @@ export const handler = async (event: any) => {
       }
 
       return response(event, 200, { ok: true });
+    }
+
+    if (route.endsWith("/admin/cost") && event.httpMethod === "GET") {
+      const costWindow = getMonthCostWindow();
+      const [result, realtimeEstimate] = await Promise.all([
+        costExplorerClient.send(
+          new GetCostAndUsageCommand({
+            TimePeriod: {
+              Start: costWindow.start,
+              End: costWindow.end
+            },
+            Granularity: "MONTHLY",
+            Metrics: ["UnblendedCost"],
+            GroupBy: [
+              {
+                Type: "DIMENSION",
+                Key: "SERVICE"
+              }
+            ]
+          })
+        ),
+        buildRealtimeCostEstimate(costWindow)
+      ]);
+
+      const groups = result.ResultsByTime?.[0]?.Groups ?? [];
+      const services = groups
+        .map((group) => {
+          const amount = Number(group.Metrics?.UnblendedCost?.Amount ?? "0");
+          return {
+            service: group.Keys?.[0] ?? "Unknown",
+            amountUsd: Number.isFinite(amount) ? amount : 0
+          };
+        })
+        .filter((item) => Math.abs(item.amountUsd) > 0.000001)
+        .sort((a, b) => b.amountUsd - a.amountUsd);
+
+      const actualUsd = Math.max(
+        0,
+        services.reduce((total, item) => total + item.amountUsd, 0)
+      );
+      const projectedUsd =
+        (actualUsd / costWindow.elapsedDays) * costWindow.daysInMonth;
+
+      return response(event, 200, {
+        currency: "USD",
+        periodStart: costWindow.start,
+        periodEndExclusive: costWindow.end,
+        elapsedDays: costWindow.elapsedDays,
+        daysInMonth: costWindow.daysInMonth,
+        actualUsd,
+        projectedUsd,
+        services,
+        realtimeEstimate,
+        updatedAt: new Date().toISOString(),
+        note:
+          "Cost Explorer data is delayed and is not a strict real-time bill."
+      });
     }
 
     if (route.endsWith("/admin/ttl") && event.httpMethod === "POST") {

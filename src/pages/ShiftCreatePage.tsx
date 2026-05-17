@@ -99,6 +99,22 @@ function buildTimeSlots(
   return slots;
 }
 
+function parseTimeToMinutes(time: string): number {
+  const [hour, minute] = time.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
+function formatMinutes(minutes: number): string {
+  const hour = `${Math.floor(minutes / 60)}`.padStart(2, "0");
+  const minute = `${minutes % 60}`.padStart(2, "0");
+  return `${hour}:${minute}`;
+}
+
+function formatSlotRange(time: string, intervalMinutes: number): string {
+  const start = parseTimeToMinutes(time);
+  return `${time}-${formatMinutes(start + intervalMinutes)}`;
+}
+
 function formatSelectedDate(dateKey: string): string {
   const [year, month, day] = dateKey.split("-").map(Number);
   const date = new Date(year, month - 1, day);
@@ -547,10 +563,10 @@ export default function ShiftCreatePage() {
               <div
                 className="assignment-row assignment-row--header"
                 style={{
-                  gridTemplateColumns: `72px repeat(${staffForRole.length}, minmax(0, 1fr))`
+                  gridTemplateColumns: `112px repeat(${staffForRole.length}, minmax(0, 1fr))`
                 }}
               >
-                <div className="assignment-time-cell">時間</div>
+                <div className="assignment-time-cell">時間帯</div>
                 {staffForRole.map((member) => (
                   <div key={member.id} className="assignment-staff-cell">
                     {member.name}
@@ -562,10 +578,12 @@ export default function ShiftCreatePage() {
                   key={time}
                   className="assignment-row"
                   style={{
-                    gridTemplateColumns: `72px repeat(${staffForRole.length}, minmax(0, 1fr))`
+                    gridTemplateColumns: `112px repeat(${staffForRole.length}, minmax(0, 1fr))`
                   }}
                 >
-                  <div className="assignment-time-cell">{time}</div>
+                  <div className="assignment-time-cell">
+                    {formatSlotRange(time, 30)}
+                  </div>
                   {staffForRole.map((member) => {
                     const isSelected = Boolean(
                       dayAssignments[time]?.[member.id]

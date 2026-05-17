@@ -229,6 +229,62 @@ select {
   color: var(--error-ink);
 }
 
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.metric-card {
+  min-height: 122px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.metric-card--live {
+  border-color: #9fc4bd;
+  background: #f2faf7;
+}
+
+.metric-label {
+  margin-bottom: 8px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.metric-value {
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.metric-value--small {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.metric-subvalue {
+  margin-top: 6px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.formula-box {
+  margin: 12px 0 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
 .primary-button,
 .secondary-button {
   border: none;
@@ -256,5 +312,9 @@ select {
 
   .admin-main {
     padding: 16px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
   }
 }

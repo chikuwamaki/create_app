@@ -10,6 +10,7 @@ import AssignmentsPage from "./pages/AssignmentsPage";
 import UsersPage from "./pages/UsersPage";
 import PublishPage from "./pages/PublishPage";
 import TtlPage from "./pages/TtlPage";
+import CostPage from "./pages/CostPage";
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const auth = useAuth();
@@ -42,6 +43,7 @@ export default function App() {
           <NavLink to="/assignments">割当</NavLink>
           <NavLink to="/publish">公開状態</NavLink>
           <NavLink to="/users">ユーザー</NavLink>
+          <NavLink to="/cost">コスト</NavLink>
           <NavLink to="/ttl">データ整理</NavLink>
         </nav>
         <div className="auth">
@@ -94,6 +96,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <TtlPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/cost"
+            element={
+              <PrivateRoute>
+                <CostPage />
               </PrivateRoute>
             }
           />

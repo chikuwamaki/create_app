@@ -28,6 +28,7 @@ type ShiftAppInfraStackProps = StackProps & {
   budgetAlertThresholdUsd: number;
   budgetShutdownThresholdUsd: number;
   stopApiLambda: boolean;
+  enableWaf: boolean;
   wafRateLimit: number;
   apiThrottleRate: number;
   apiThrottleBurst: number;
@@ -148,6 +149,7 @@ export class ShiftAppInfraStack extends Stack {
     const budgetAlertThresholdUsd = props.budgetAlertThresholdUsd;
     const budgetShutdownThresholdUsd = props.budgetShutdownThresholdUsd;
     const stopApiLambda = props.stopApiLambda;
+    const enableWaf = props.enableWaf;
     const wafRateLimit = props.wafRateLimit;
     const apiThrottleRate = props.apiThrottleRate;
     const apiThrottleBurst = props.apiThrottleBurst;
@@ -166,21 +168,31 @@ export class ShiftAppInfraStack extends Stack {
       "UserPool",
       props.userPoolId
     );
+    const submissionHandlerMemoryMb = 128;
 
     const handler = new lambdaNodejs.NodejsFunction(
       this,
       "ShiftSubmissionHandler",
       {
         runtime: lambda.Runtime.NODEJS_18_X,
+        memorySize: submissionHandlerMemoryMb,
+        timeout: cdk.Duration.seconds(20),
         entry: path.join(__dirname, "../lambda/shift-submissions.ts"),
         handler: "handler",
         environment: {
           TABLE_NAME: table.tableName,
           CORS_ORIGINS: allowedOrigins.join(","),
           USER_POOL_ID: userPool.userPoolId,
-          ADMIN_GROUP_NAME: adminGroupName
+          ADMIN_GROUP_NAME: adminGroupName,
+          WAF_ENABLED: enableWaf ? "true" : "false"
         }
       }
+    );
+    handler.addEnvironment("LAMBDA_MEMORY_MB", `${submissionHandlerMemoryMb}`);
+    handler.addEnvironment("SITE_DISTRIBUTION_ID", distribution.distributionId);
+    handler.addEnvironment(
+      "ADMIN_DISTRIBUTION_ID",
+      adminDistribution.distributionId
     );
 
     const shutdownTopic = new sns.Topic(this, "BudgetShutdownTopic");
@@ -240,6 +252,20 @@ export class ShiftAppInfraStack extends Stack {
           "cognito-idp:ListUsers"
         ],
         resources: [userPool.userPoolArn]
+      })
+    );
+
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ce:GetCostAndUsage"],
+        resources: ["*"]
+      })
+    );
+
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["cloudwatch:GetMetricStatistics"],
+        resources: ["*"]
       })
     );
 
@@ -357,54 +383,56 @@ export class ShiftAppInfraStack extends Stack {
       }
     });
 
-    const webAcl = new wafv2.CfnWebACL(this, "ShiftApiWebAcl", {
-      defaultAction: { allow: {} },
-      scope: "REGIONAL",
-      visibilityConfig: {
-        sampledRequestsEnabled: true,
-        cloudWatchMetricsEnabled: true,
-        metricName: "ShiftApiWebAcl"
-      },
-      rules: [
-        {
-          name: "AWSManagedCommonRuleSet",
-          priority: 0,
-          overrideAction: { none: {} },
-          statement: {
-            managedRuleGroupStatement: {
-              vendorName: "AWS",
-              name: "AWSManagedRulesCommonRuleSet"
-            }
-          },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: "AWSManagedCommonRuleSet"
-          }
+    if (enableWaf) {
+      const webAcl = new wafv2.CfnWebACL(this, "ShiftApiWebAcl", {
+        defaultAction: { allow: {} },
+        scope: "REGIONAL",
+        visibilityConfig: {
+          sampledRequestsEnabled: true,
+          cloudWatchMetricsEnabled: true,
+          metricName: "ShiftApiWebAcl"
         },
-        {
-          name: "RateLimit",
-          priority: 1,
-          action: { block: {} },
-          statement: {
-            rateBasedStatement: {
-              limit: wafRateLimit,
-              aggregateKeyType: "IP"
+        rules: [
+          {
+            name: "AWSManagedCommonRuleSet",
+            priority: 0,
+            overrideAction: { none: {} },
+            statement: {
+              managedRuleGroupStatement: {
+                vendorName: "AWS",
+                name: "AWSManagedRulesCommonRuleSet"
+              }
+            },
+            visibilityConfig: {
+              sampledRequestsEnabled: true,
+              cloudWatchMetricsEnabled: true,
+              metricName: "AWSManagedCommonRuleSet"
             }
           },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: "RateLimit"
+          {
+            name: "RateLimit",
+            priority: 1,
+            action: { block: {} },
+            statement: {
+              rateBasedStatement: {
+                limit: wafRateLimit,
+                aggregateKeyType: "IP"
+              }
+            },
+            visibilityConfig: {
+              sampledRequestsEnabled: true,
+              cloudWatchMetricsEnabled: true,
+              metricName: "RateLimit"
+            }
           }
-        }
-      ]
-    });
+        ]
+      });
 
-    new wafv2.CfnWebACLAssociation(this, "ShiftApiWebAclAssociation", {
-      resourceArn: api.deploymentStage.stageArn,
-      webAclArn: webAcl.attrArn
-    });
+      new wafv2.CfnWebACLAssociation(this, "ShiftApiWebAclAssociation", {
+        resourceArn: api.deploymentStage.stageArn,
+        webAclArn: webAcl.attrArn
+      });
+    }
 
     const gatewayResponseHeaders = {
       "Access-Control-Allow-Origin": "'*'",
@@ -430,6 +458,7 @@ export class ShiftAppInfraStack extends Stack {
     const adminAssignments = admin.addResource("assignments");
     const adminPublish = admin.addResource("publish");
     const adminUsers = admin.addResource("users");
+    const adminCost = admin.addResource("cost");
     const adminTtl = admin.addResource("ttl");
     const integration = new apigateway.LambdaIntegration(handler);
 
@@ -499,6 +528,11 @@ export class ShiftAppInfraStack extends Stack {
     });
 
     adminUsers.addMethod("POST", integration, {
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer
+    });
+
+    adminCost.addMethod("GET", integration, {
       authorizationType: apigateway.AuthorizationType.COGNITO,
       authorizer
     });

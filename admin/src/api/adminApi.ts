@@ -50,6 +50,49 @@ export type AdminDataSummary = {
   deleted?: number;
 };
 
+export type AdminCostService = {
+  service: string;
+  amountUsd: number;
+};
+
+export type AdminRealtimeCostService = AdminCostService & {
+  usage: number;
+  unit: string;
+  detail: string;
+};
+
+export type AdminRealtimeCostEstimate = {
+  source: "CloudWatch";
+  periodStart: string;
+  periodEnd: string;
+  elapsedHours: number;
+  monthHours: number;
+  estimatedUsd: number;
+  projectedUsd: number;
+  services: AdminRealtimeCostService[];
+  pricing: {
+    currency: "USD";
+    usdToJpy: number;
+    label: string;
+  };
+  wafEnabled?: boolean;
+  note?: string;
+};
+
+export type AdminCostSummary = {
+  currency: "USD";
+  periodStart: string;
+  periodEndExclusive: string;
+  elapsedDays: number;
+  daysInMonth: number;
+  actualUsd: number;
+  projectedUsd: number;
+  services: AdminCostService[];
+  realtimeEstimate?: AdminRealtimeCostEstimate;
+  updatedAt: string;
+  note?: string;
+};
+
 function requireEnv(name: string): string {
   const value = import.meta.env[name] as string | undefined;
   if (!value) {
@@ -312,6 +355,13 @@ export async function updateAdminUser(params: {
     role: params.role,
     isAdmin: params.isAdmin
   });
+}
+
+export async function fetchAdminCost(params: {
+  token: string;
+}): Promise<AdminCostSummary> {
+  const url = buildUrl("admin/cost");
+  return await getJson<AdminCostSummary>(url, params.token);
 }
 
 export async function backfillTtl(params: {
