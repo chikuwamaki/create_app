@@ -7,6 +7,7 @@ import {
   type Assignment,
   type PublishState
 } from "../api/shiftApi";
+import { getRoleFromProfile } from "../auth/roles";
 import { formatMonth, getMonthOptions } from "../utils/monthOptions";
 
 type Row = {
@@ -169,6 +170,8 @@ export default function ShiftListPage() {
   const auth = useAuth();
   const idToken = auth.user?.id_token;
   const userId = (auth.user?.profile as { sub?: string } | undefined)?.sub;
+  const role = getRoleFromProfile(auth.user?.profile);
+  const isManager = role === "manager";
   const monthOptions = useMemo(() => getMonthOptions(), []);
   const [selectedMonth, setSelectedMonth] = useState(
     monthOptions[0] ?? formatMonth(new Date())
@@ -240,7 +243,9 @@ export default function ShiftListPage() {
         if (state.status === "published") {
           return Promise.all([
             fetchAssignments({ month: selectedMonth, token: idToken }),
-            fetchSubmissions({ month: selectedMonth, token: idToken })
+            isManager
+              ? fetchSubmissions({ month: selectedMonth, token: idToken })
+              : Promise.resolve([])
           ]);
         }
         return null;
@@ -254,14 +259,16 @@ export default function ShiftListPage() {
           const staffNames = new Map(
             submissions.map((submission) => [submission.userId, submission.name])
           );
-          setAssignments(
-            result[0].items
-              .filter((assignment) => staffNames.has(assignment.staffId))
-              .map((assignment) => ({
-                ...assignment,
-                staffName: staffNames.get(assignment.staffId) ?? assignment.staffName
-              }))
-          );
+          const items = staffNames.size
+            ? result[0].items
+                .filter((assignment) => staffNames.has(assignment.staffId))
+                .map((assignment) => ({
+                  ...assignment,
+                  staffName:
+                    staffNames.get(assignment.staffId) ?? assignment.staffName
+                }))
+            : result[0].items;
+          setAssignments(items);
         } else {
           setAssignments([]);
         }
@@ -283,7 +290,7 @@ export default function ShiftListPage() {
     return () => {
       active = false;
     };
-  }, [selectedMonth, idToken]);
+  }, [selectedMonth, idToken, isManager]);
 
   useEffect(() => {
     const [year, month] = selectedMonth.split("-").map(Number);

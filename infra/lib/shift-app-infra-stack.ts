@@ -154,6 +154,8 @@ export class ShiftAppInfraStack extends Stack {
     const apiThrottleRate = props.apiThrottleRate;
     const apiThrottleBurst = props.apiThrottleBurst;
     const adminGroupName = props.adminGroupName ?? "admins";
+    const geminiApiKeyParameter =
+      process.env.GEMINI_API_KEY_PARAMETER ?? "/shift-app/gemini/api-key";
 
     const table = new dynamodb.Table(this, "ShiftSubmissions", {
       partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
@@ -176,7 +178,7 @@ export class ShiftAppInfraStack extends Stack {
       {
         runtime: lambda.Runtime.NODEJS_18_X,
         memorySize: submissionHandlerMemoryMb,
-        timeout: cdk.Duration.seconds(20),
+        timeout: cdk.Duration.seconds(25),
         entry: path.join(__dirname, "../lambda/shift-submissions.ts"),
         handler: "handler",
         environment: {
@@ -184,7 +186,9 @@ export class ShiftAppInfraStack extends Stack {
           CORS_ORIGINS: allowedOrigins.join(","),
           USER_POOL_ID: userPool.userPoolId,
           ADMIN_GROUP_NAME: adminGroupName,
-          WAF_ENABLED: enableWaf ? "true" : "false"
+          WAF_ENABLED: enableWaf ? "true" : "false",
+          GEMINI_API_KEY_PARAMETER: geminiApiKeyParameter,
+          GEMINI_MODEL: process.env.GEMINI_MODEL ?? "gemini-3.5-flash"
         }
       }
     );
@@ -266,6 +270,19 @@ export class ShiftAppInfraStack extends Stack {
       new iam.PolicyStatement({
         actions: ["cloudwatch:GetMetricStatistics"],
         resources: ["*"]
+      })
+    );
+
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          Stack.of(this).formatArn({
+            service: "ssm",
+            resource: "parameter",
+            resourceName: geminiApiKeyParameter.replace(/^\//, "")
+          })
+        ]
       })
     );
 
@@ -452,14 +469,17 @@ export class ShiftAppInfraStack extends Stack {
 
     const availability = api.root.addResource("availability");
     const assignments = api.root.addResource("assignments");
+    const assignmentsGenerate = assignments.addResource("generate");
     const publish = api.root.addResource("publish");
     const admin = api.root.addResource("admin");
     const adminAvailability = admin.addResource("availability");
     const adminAssignments = admin.addResource("assignments");
+    const adminAssignmentsGenerate = adminAssignments.addResource("generate");
     const adminPublish = admin.addResource("publish");
     const adminUsers = admin.addResource("users");
     const adminCost = admin.addResource("cost");
     const adminTtl = admin.addResource("ttl");
+    const adminAgent = admin.addResource("agent");
     const integration = new apigateway.LambdaIntegration(handler);
 
     availability.addMethod("GET", integration, {
@@ -478,6 +498,11 @@ export class ShiftAppInfraStack extends Stack {
     });
 
     assignments.addMethod("POST", integration, {
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer
+    });
+
+    assignmentsGenerate.addMethod("POST", integration, {
       authorizationType: apigateway.AuthorizationType.COGNITO,
       authorizer
     });
@@ -512,6 +537,11 @@ export class ShiftAppInfraStack extends Stack {
       authorizer
     });
 
+    adminAssignmentsGenerate.addMethod("POST", integration, {
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer
+    });
+
     adminPublish.addMethod("GET", integration, {
       authorizationType: apigateway.AuthorizationType.COGNITO,
       authorizer
@@ -538,6 +568,11 @@ export class ShiftAppInfraStack extends Stack {
     });
 
     adminTtl.addMethod("POST", integration, {
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer
+    });
+
+    adminAgent.addMethod("POST", integration, {
       authorizationType: apigateway.AuthorizationType.COGNITO,
       authorizer
     });

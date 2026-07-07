@@ -24,6 +24,9 @@ import {
   CloudWatchClient,
   GetMetricStatisticsCommand
 } from "@aws-sdk/client-cloudwatch";
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { generateText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const TABLE_NAME = process.env.TABLE_NAME;
 const CORS_ORIGINS =
@@ -36,6 +39,10 @@ const LAMBDA_MEMORY_MB = Number(process.env.LAMBDA_MEMORY_MB ?? "128");
 const SITE_DISTRIBUTION_ID = process.env.SITE_DISTRIBUTION_ID;
 const ADMIN_DISTRIBUTION_ID = process.env.ADMIN_DISTRIBUTION_ID;
 const WAF_ENABLED = process.env.WAF_ENABLED === "true";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY_PARAMETER =
+  process.env.GEMINI_API_KEY_PARAMETER ?? "/shift-app/gemini/api-key";
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client, {
@@ -47,6 +54,7 @@ const cognitoClient = new CognitoIdentityProviderClient({});
 const costExplorerClient = new CostExplorerClient({ region: "us-east-1" });
 const cloudWatchClient = new CloudWatchClient({});
 const cloudWatchGlobalClient = new CloudWatchClient({ region: "us-east-1" });
+const ssmClient = new SSMClient({});
 const TTL_MONTHS = 12;
 const SUBMISSION_ROLES = ["ホール", "キッチン", "どちらでも"] as const;
 const ASSIGNMENT_ROLES = ["ホール", "キッチン"] as const;
@@ -592,6 +600,660 @@ async function getPublishState(month: string): Promise<PublishItem> {
   );
 }
 
+type AgentStaffSummary = {
+  alias: string;
+  name: string;
+  assignedCount: number;
+  submittedCount: number;
+};
+
+type GeneratedAssignment = {
+  date: string;
+  time: string;
+  role: string;
+  staffId: string;
+  staffName: string;
+};
+
+type GenerateShortage = {
+  date: string;
+  time: string;
+  requiredCount: number;
+  assignedCount: number;
+  shortageCount: number;
+  availableCount: number;
+};
+
+type StaffingRules = {
+  defaultStaffPerSlot: number;
+  weekdayStaffPerSlot: number;
+  weekendStaffPerSlot: number;
+  dateOverrides: Record<string, number>;
+};
+
+function staffAlias(index: number): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  if (index < alphabet.length) {
+    return `スタッフ${alphabet[index]}`;
+  }
+  return `スタッフ${index + 1}`;
+}
+
+function getDatesInMonth(month: string): string[] {
+  const [year, monthValue] = month.split("-").map(Number);
+  const lastDay = new Date(Date.UTC(year, monthValue, 0)).getUTCDate();
+  return Array.from({ length: lastDay }, (_, index) => {
+    const day = `${index + 1}`.padStart(2, "0");
+    return `${month}-${day}`;
+  });
+}
+
+function normalizeStaffingRules(input: any, fallback: number): StaffingRules {
+  const normalizeCount = (value: unknown, defaultValue: number) => {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue)
+      ? Math.max(1, Math.min(10, Math.round(numberValue)))
+      : defaultValue;
+  };
+
+  const defaultStaffPerSlot = normalizeCount(
+    input?.defaultStaffPerSlot,
+    fallback
+  );
+  const weekdayStaffPerSlot = normalizeCount(
+    input?.weekdayStaffPerSlot,
+    defaultStaffPerSlot
+  );
+  const weekendStaffPerSlot = normalizeCount(
+    input?.weekendStaffPerSlot,
+    defaultStaffPerSlot
+  );
+  const dateOverridesInput = input?.dateOverrides;
+  const dateOverrides: Record<string, number> = {};
+
+  if (dateOverridesInput && typeof dateOverridesInput === "object") {
+    Object.entries(dateOverridesInput as Record<string, unknown>).forEach(
+      ([date, count]) => {
+        if (isValidDate(date)) {
+          dateOverrides[date] = normalizeCount(count, defaultStaffPerSlot);
+        }
+      }
+    );
+  }
+
+  return {
+    defaultStaffPerSlot,
+    weekdayStaffPerSlot,
+    weekendStaffPerSlot,
+    dateOverrides
+  };
+}
+
+function getRequiredStaffForDate(date: string, rules: StaffingRules): number {
+  const override = rules.dateOverrides[date];
+  if (override) {
+    return override;
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+  const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return dayOfWeek === 0 || dayOfWeek === 6
+    ? rules.weekendStaffPerSlot
+    : rules.weekdayStaffPerSlot;
+}
+
+function roleMatchesPreference(role: string, rolePreference: string): boolean {
+  return rolePreference === role || rolePreference === "どちらでも";
+}
+
+function chooseRoleForCandidate(params: {
+  candidate: SubmissionItem;
+  targetRole: string;
+  roleCounts: Map<string, number>;
+  roles: string[];
+}) {
+  if (roleMatchesPreference(params.targetRole, params.candidate.rolePreference)) {
+    return params.targetRole;
+  }
+
+  const preferredRoles = params.roles.filter((role) =>
+    roleMatchesPreference(role, params.candidate.rolePreference)
+  );
+  if (preferredRoles.length === 0) {
+    return params.targetRole;
+  }
+
+  return preferredRoles.sort(
+    (a, b) =>
+      (params.roleCounts.get(a) ?? 0) - (params.roleCounts.get(b) ?? 0) ||
+      a.localeCompare(b, "ja")
+  )[0];
+}
+
+function generateAssignmentDraft(params: {
+  month: string;
+  minStaffPerSlot: number;
+  staffingRules: StaffingRules;
+  roles: string[];
+  submissions: SubmissionItem[];
+}) {
+  const slotMap = new Map<string, SubmissionItem[]>();
+  const submittedCounts = new Map<string, number>();
+
+  params.submissions.forEach((submission) => {
+    Object.entries(submission.slotsByDate ?? {}).forEach(([date, times]) => {
+      if (!date.startsWith(params.month)) {
+        return;
+      }
+      times.forEach((time) => {
+        const key = `${date}#${time}`;
+        const list = slotMap.get(key) ?? [];
+        list.push(submission);
+        slotMap.set(key, list);
+        submittedCounts.set(
+          submission.userId,
+          (submittedCounts.get(submission.userId) ?? 0) + 1
+        );
+      });
+    });
+  });
+
+  const assignments: GeneratedAssignment[] = [];
+  const shortages: GenerateShortage[] = [];
+  const assignedCounts = new Map<string, number>();
+  const dailyCounts = new Map<string, number>();
+  const roleCounts = new Map<string, number>();
+
+  Array.from(slotMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .forEach(([key, candidates]) => {
+      const [date, time] = key.split("#");
+      const assignedInSlot = new Set<string>();
+      const targetCount = getRequiredStaffForDate(date, params.staffingRules);
+
+      for (let index = 0; index < targetCount; index += 1) {
+        const targetRole = params.roles[index % params.roles.length];
+        const selected = candidates
+          .filter((candidate) => !assignedInSlot.has(candidate.userId))
+          .map((candidate) => {
+            const exactRole = candidate.rolePreference === targetRole;
+            const canTargetRole = roleMatchesPreference(
+              targetRole,
+              candidate.rolePreference
+            );
+            const assignedCount = assignedCounts.get(candidate.userId) ?? 0;
+            const dailyCount = dailyCounts.get(`${candidate.userId}#${date}`) ?? 0;
+            const submittedCount = submittedCounts.get(candidate.userId) ?? 0;
+            const roleLoad = roleCounts.get(`${candidate.userId}#${targetRole}`) ?? 0;
+            const score =
+              assignedCount * 10 +
+              dailyCount * 6 +
+              roleLoad * 3 -
+              submittedCount * 0.05 -
+              (exactRole ? 4 : canTargetRole ? 2 : 0);
+
+            return { candidate, score };
+          })
+          .sort(
+            (a, b) =>
+              a.score - b.score ||
+              a.candidate.name.localeCompare(b.candidate.name, "ja")
+          )[0]?.candidate;
+
+        if (!selected) {
+          break;
+        }
+
+        const role = chooseRoleForCandidate({
+          candidate: selected,
+          targetRole,
+          roleCounts,
+          roles: params.roles
+        });
+
+        assignments.push({
+          date,
+          time,
+          role,
+          staffId: selected.userId,
+          staffName: selected.name
+        });
+        assignedInSlot.add(selected.userId);
+        assignedCounts.set(
+          selected.userId,
+          (assignedCounts.get(selected.userId) ?? 0) + 1
+        );
+        dailyCounts.set(
+          `${selected.userId}#${date}`,
+          (dailyCounts.get(`${selected.userId}#${date}`) ?? 0) + 1
+        );
+        roleCounts.set(
+          `${selected.userId}#${role}`,
+          (roleCounts.get(`${selected.userId}#${role}`) ?? 0) + 1
+        );
+      }
+
+      if (assignedInSlot.size < targetCount) {
+        shortages.push({
+          date,
+          time,
+          requiredCount: targetCount,
+          assignedCount: assignedInSlot.size,
+          shortageCount: targetCount - assignedInSlot.size,
+          availableCount: candidates.length
+        });
+      }
+    });
+
+  const staffLoads = params.submissions
+    .map((submission) => ({
+      staffId: submission.userId,
+      staffName: submission.name,
+      assignedCount: assignedCounts.get(submission.userId) ?? 0,
+      submittedCount: submittedCounts.get(submission.userId) ?? 0
+    }))
+    .sort(
+      (a, b) =>
+        b.assignedCount - a.assignedCount ||
+        b.submittedCount - a.submittedCount ||
+        a.staffName.localeCompare(b.staffName, "ja")
+    );
+
+  return {
+    assignments,
+    shortages,
+    staffLoads,
+    rules: {
+      minStaffPerSlot: params.minStaffPerSlot,
+      staffingRules: params.staffingRules,
+      roles: params.roles,
+      source: "submitted availability only",
+      strategy:
+        "希望提出がある枠だけを対象に、勤務回数が少ないスタッフと役割希望に合うスタッフを優先して割当"
+    }
+  };
+}
+
+function buildAgentDataset(params: {
+  month: string;
+  minStaffPerSlot: number;
+  assignments: AssignmentItem[];
+  submissions: SubmissionItem[];
+}) {
+  const staffMap = new Map<
+    string,
+    {
+      alias: string;
+      name: string;
+      assignedCount: number;
+      submittedCount: number;
+      submittedSlots: Set<string>;
+    }
+  >();
+
+  const ensureStaff = (staffId: string, name: string) => {
+    const existing = staffMap.get(staffId);
+    if (existing) {
+      if (name) {
+        existing.name = name;
+      }
+      return existing;
+    }
+    const item = {
+      alias: staffAlias(staffMap.size),
+      name: name || "スタッフ",
+      assignedCount: 0,
+      submittedCount: 0,
+      submittedSlots: new Set<string>()
+    };
+    staffMap.set(staffId, item);
+    return item;
+  };
+
+  params.submissions.forEach((submission) => {
+    const staff = ensureStaff(submission.userId, submission.name);
+    Object.entries(submission.slotsByDate ?? {}).forEach(([date, times]) => {
+      times.forEach((time) => {
+        staff.submittedSlots.add(`${date}#${time}`);
+      });
+    });
+    staff.submittedCount = staff.submittedSlots.size;
+  });
+
+  params.assignments.forEach((assignment) => {
+    const staff = ensureStaff(assignment.staffId, assignment.staffName);
+    staff.assignedCount += 1;
+  });
+
+  const slotMap = new Map<
+    string,
+    {
+      date: string;
+      time: string;
+      assigned: string[];
+      available: string[];
+    }
+  >();
+
+  const ensureSlot = (date: string, time: string) => {
+    const key = `${date}#${time}`;
+    const existing = slotMap.get(key);
+    if (existing) {
+      return existing;
+    }
+    const item = { date, time, assigned: [] as string[], available: [] as string[] };
+    slotMap.set(key, item);
+    return item;
+  };
+
+  params.submissions.forEach((submission) => {
+    const staff = ensureStaff(submission.userId, submission.name);
+    Object.entries(submission.slotsByDate ?? {}).forEach(([date, times]) => {
+      times.forEach((time) => {
+        const slot = ensureSlot(date, time);
+        if (!slot.available.includes(staff.alias)) {
+          slot.available.push(staff.alias);
+        }
+      });
+    });
+  });
+
+  params.assignments.forEach((assignment) => {
+    const staff = ensureStaff(assignment.staffId, assignment.staffName);
+    const slot = ensureSlot(assignment.date, assignment.time);
+    slot.assigned.push(`${staff.alias}/${assignment.role}`);
+  });
+
+  const staff = Array.from(staffMap.values())
+    .map((item): AgentStaffSummary => ({
+      alias: item.alias,
+      name: item.name,
+      assignedCount: item.assignedCount,
+      submittedCount: item.submittedCount
+    }))
+    .sort((a, b) => b.assignedCount - a.assignedCount || a.alias.localeCompare(b.alias));
+
+  const slots = Array.from(slotMap.values()).sort(
+    (a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)
+  );
+  const submissionDates = new Set<string>();
+  const assignmentDates = new Set<string>();
+
+  params.submissions.forEach((submission) => {
+    Object.entries(submission.slotsByDate ?? {}).forEach(([date, times]) => {
+      if (times.length > 0) {
+        submissionDates.add(date);
+      }
+    });
+  });
+
+  params.assignments.forEach((assignment) => {
+    assignmentDates.add(assignment.date);
+  });
+
+  const calendarDays = getDatesInMonth(params.month).map((date) => ({
+    date,
+    hasAnySubmission: submissionDates.has(date),
+    hasAnyAssignment: assignmentDates.has(date),
+    note: submissionDates.has(date)
+      ? "この日は少なくとも1人がシフト希望を提出している"
+      : "この日はシフト希望が1件も提出されていない"
+  }));
+  const noSubmissionDates = calendarDays
+    .filter((day) => !day.hasAnySubmission)
+    .map((day) => day.date);
+
+  const shortages = slots
+    .map((slot) => ({
+      date: slot.date,
+      time: slot.time,
+      assignedCount: slot.assigned.length,
+      requiredCount: params.minStaffPerSlot,
+      shortageCount: Math.max(0, params.minStaffPerSlot - slot.assigned.length),
+      assigned: slot.assigned,
+      available: slot.available
+    }))
+    .filter((slot) => slot.shortageCount > 0)
+    .sort(
+      (a, b) =>
+        b.shortageCount - a.shortageCount ||
+        a.date.localeCompare(b.date) ||
+        a.time.localeCompare(b.time)
+    );
+
+  const average =
+    staff.length > 0
+      ? staff.reduce((total, item) => total + item.assignedCount, 0) / staff.length
+      : 0;
+  const imbalances = staff
+    .map((item) => ({
+      alias: item.alias,
+      assignedCount: item.assignedCount,
+      submittedCount: item.submittedCount,
+      differenceFromAverage: Number((item.assignedCount - average).toFixed(2))
+    }))
+    .sort((a, b) => b.differenceFromAverage - a.differenceFromAverage);
+
+  const mismatches = params.assignments
+    .filter((assignment) => {
+      const staff = staffMap.get(assignment.staffId);
+      return !staff?.submittedSlots.has(`${assignment.date}#${assignment.time}`);
+    })
+    .map((assignment) => ({
+      date: assignment.date,
+      time: assignment.time,
+      role: assignment.role,
+      staff: staffMap.get(assignment.staffId)?.alias ?? "不明"
+    }));
+
+  return {
+    dataset: {
+      month: params.month,
+      minStaffPerSlot: params.minStaffPerSlot,
+      domainRules: [
+        "calendarDaysに存在し、hasAnySubmission=false の日は、その日について誰もシフト希望を提出していないことを意味する。",
+        "slotsに存在しない日付・時間帯は、提出も割当も確認できないため、希望者がいると推測してはいけない。",
+        "availableが空の不足枠は、希望提出者がいない不足であり、追加募集または個別確認が必要。",
+        "mismatchAssignmentsは、割当はあるが本人の提出希望に含まれていない可能性がある枠である。",
+        "質問で特定の日付を聞かれた場合、その日がnoSubmissionDatesに含まれるなら、まず未提出日であることを伝える。"
+      ],
+      totals: {
+        staff: staff.length,
+        submissions: params.submissions.length,
+        assignments: params.assignments.length,
+        slots: slots.length,
+        noSubmissionDates: noSubmissionDates.length
+      },
+      calendarDays,
+      noSubmissionDates,
+      staff: staff.map(({ alias, assignedCount, submittedCount }) => ({
+        alias,
+        assignedCount,
+        submittedCount
+      })),
+      shortages: shortages.slice(0, 30),
+      imbalances: imbalances.slice(0, 30),
+      mismatchAssignments: mismatches.slice(0, 30)
+    },
+    aliases: staff.map(({ alias, name }) => ({ alias, name }))
+  };
+}
+
+function restoreStaffNames(text: string, aliases: Array<{ alias: string; name: string }>): string {
+  return aliases.reduce((current, item) => {
+    return current.replaceAll(item.alias, item.name);
+  }, text);
+}
+
+async function getGeminiApiKey(): Promise<string> {
+  if (GEMINI_API_KEY) {
+    return GEMINI_API_KEY;
+  }
+
+  const result = await ssmClient.send(
+    new GetParameterCommand({
+      Name: GEMINI_API_KEY_PARAMETER,
+      WithDecryption: true
+    })
+  );
+  const value = result.Parameter?.Value;
+  if (!value) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+  return value;
+}
+
+async function buildGeminiAgentAnswer(params: {
+  month: string;
+  question: string;
+  minStaffPerSlot: number;
+  assignments: AssignmentItem[];
+  submissions: SubmissionItem[];
+}) {
+  const { dataset, aliases } = buildAgentDataset(params);
+  const apiKey = await getGeminiApiKey();
+  const google = createGoogleGenerativeAI({ apiKey });
+  const result = await generateText({
+    model: google(GEMINI_MODEL),
+    temperature: 0.2,
+    system:
+      [
+        "あなたは飲食店のシフト管理を支援するAIエージェントです。",
+        "渡されるデータは匿名化済みです。店長がすぐ判断できるように、短く具体的な日本語で回答してください。",
+        "このアプリでは、シフト希望は提出された日付・時間帯だけがslotsに現れます。",
+        "calendarDaysに存在し、hasAnySubmission=false の日は、その日について誰もシフト希望を提出していない日です。",
+        "slotsに存在しない日付・時間帯について、希望者や割当があると推測してはいけません。",
+        "availableが空の不足枠は、希望提出者がいない不足として扱い、追加募集または個別確認を提案してください。",
+        "mismatchAssignmentsは、本人の提出希望に含まれていない可能性がある割当です。断定せず、本人確認が必要と表現してください。",
+        "質問で特定の日付を聞かれ、その日がnoSubmissionDatesに含まれる場合は、まずシフト希望が未提出であることを伝えてください。",
+        "存在しないデータを推測で作らないでください。"
+      ].join("\n"),
+    prompt: [
+      `質問: ${params.question}`,
+      "匿名化済みシフトデータ:",
+      JSON.stringify(dataset, null, 2),
+      "回答形式:",
+      "1. 結論",
+      "2. 確認できた問題",
+      "3. 修正案"
+    ].join("\n")
+  });
+
+  return {
+    answer: restoreStaffNames(result.text.trim(), aliases),
+    source: "gemini",
+    model: GEMINI_MODEL,
+    anonymized: true,
+    totals: dataset.totals
+  };
+}
+
+async function explainGeneratedAssignments(params: {
+  month: string;
+  minStaffPerSlot: number;
+  assignments: GeneratedAssignment[];
+  shortages: GenerateShortage[];
+  staffLoads: Array<{
+    staffId: string;
+    staffName: string;
+    assignedCount: number;
+    submittedCount: number;
+  }>;
+}) {
+  const aliasByStaffId = new Map<string, { alias: string; name: string }>();
+  params.staffLoads.forEach((staff, index) => {
+    aliasByStaffId.set(staff.staffId, {
+      alias: staffAlias(index),
+      name: staff.staffName
+    });
+  });
+
+  const anonymized = {
+    month: params.month,
+    minStaffPerSlot: params.minStaffPerSlot,
+    totals: {
+      assignments: params.assignments.length,
+      shortages: params.shortages.length,
+      staff: params.staffLoads.length
+    },
+    staffLoads: params.staffLoads.map((staff) => ({
+      staff: aliasByStaffId.get(staff.staffId)?.alias ?? "不明",
+      assignedCount: staff.assignedCount,
+      submittedCount: staff.submittedCount
+    })),
+    shortages: params.shortages.slice(0, 30),
+    sampleAssignments: params.assignments.slice(0, 40).map((assignment) => ({
+      date: assignment.date,
+      time: assignment.time,
+      role: assignment.role,
+      staff: aliasByStaffId.get(assignment.staffId)?.alias ?? "不明"
+    }))
+  };
+
+  try {
+    const apiKey = await getGeminiApiKey();
+    const google = createGoogleGenerativeAI({ apiKey });
+    const result = await generateText({
+      model: google(GEMINI_MODEL),
+      temperature: 0.2,
+      system: [
+        "あなたは飲食店のシフト自動作成を支援するAIエージェントです。",
+        "割当決定はすでにプログラムが行っています。あなたは生成案の理由、問題点、店長が確認すべき点を短く説明してください。",
+        "渡されるスタッフ名は匿名化済みです。存在しないデータを推測しないでください。",
+        "不足がある場合は、追加募集または個別確認が必要と伝えてください。"
+      ].join("\n"),
+      prompt: [
+        "生成されたシフト案の要約:",
+        JSON.stringify(anonymized, null, 2),
+        "回答形式:",
+        "1. 作成方針",
+        "2. 注意点",
+        "3. 店長への確認事項"
+      ].join("\n")
+    });
+
+    const aliases = Array.from(aliasByStaffId.values());
+    return restoreStaffNames(result.text.trim(), aliases);
+  } catch (err) {
+    console.error("assignment generation explanation error:", err);
+    if (params.shortages.length > 0) {
+      return `希望シフトをもとに ${params.assignments.length} 件の割当案を作成しました。不足している時間帯が ${params.shortages.length} 件あるため、追加募集または個別確認が必要です。`;
+    }
+    return `希望シフトをもとに ${params.assignments.length} 件の割当案を作成しました。店長が内容を確認してから保存してください。`;
+  }
+}
+
+function getAgentErrorResponse(err: unknown) {
+  const text = String(err);
+  if (
+    text.includes("RESOURCE_EXHAUSTED") ||
+    text.includes("quota") ||
+    text.includes("Quota exceeded")
+  ) {
+    return {
+      statusCode: 429,
+      message:
+        "Gemini APIの利用上限に達している、または現在のプロジェクトで対象モデルの無料枠が有効ではありません。Google AI StudioでAPIキーのプロジェクト、無料枠、課金設定、モデルの利用可否を確認してください。"
+    };
+  }
+
+  if (
+    err instanceof Error &&
+    (err.message === "GEMINI_API_KEY is not configured." ||
+      err.name === "ParameterNotFound")
+  ) {
+    return {
+      statusCode: 500,
+      message: `Gemini APIキーが設定されていません。SSM Parameter Storeに ${GEMINI_API_KEY_PARAMETER} をSecureStringで作成してください。`
+    };
+  }
+
+  return {
+    statusCode: 500,
+    message: "AIアシスタントの回答生成に失敗しました。"
+  };
+}
+
 export const handler = async (event: any) => {
   if (event.httpMethod === "OPTIONS") {
     return response(event, 200, { ok: true });
@@ -620,6 +1282,69 @@ export const handler = async (event: any) => {
   if (route.startsWith("/admin/")) {
     if (!adminUser) {
       return response(event, 403, { message: "管理者のみ操作できます。" });
+    }
+
+    if (route.endsWith("/admin/agent") && event.httpMethod === "POST") {
+      const body = parseJsonBody(event);
+      if (body === null) {
+        return response(event, 400, { message: "Invalid JSON body." });
+      }
+
+      const month = body.month as string | undefined;
+      const question = (body.question as string | undefined)?.trim();
+      const minStaffPerSlotValue = Number(body.minStaffPerSlot ?? "2");
+      const minStaffPerSlot = Number.isFinite(minStaffPerSlotValue)
+        ? Math.max(1, Math.min(10, Math.round(minStaffPerSlotValue)))
+        : 2;
+
+      if (!isValidMonth(month)) {
+        return response(event, 400, { message: "month is required (YYYY-MM)." });
+      }
+
+      if (!question) {
+        return response(event, 400, { message: "question is required." });
+      }
+
+      try {
+        const [submissionResult, assignmentResult] = await Promise.all([
+          docClient.send(
+            new QueryCommand({
+              TableName: TABLE_NAME,
+              KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+              ExpressionAttributeValues: {
+                ":pk": month,
+                ":sk": "SUBMISSION#"
+              }
+            })
+          ),
+          docClient.send(
+            new QueryCommand({
+              TableName: TABLE_NAME,
+              KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+              ExpressionAttributeValues: {
+                ":pk": month,
+                ":sk": "ASSIGNMENT#"
+              }
+            })
+          )
+        ]);
+
+        const result = await buildGeminiAgentAnswer({
+          month,
+          question,
+          minStaffPerSlot,
+          submissions: (submissionResult.Items ?? []) as SubmissionItem[],
+          assignments: (assignmentResult.Items ?? []) as AssignmentItem[]
+        });
+
+        return response(event, 200, result);
+      } catch (err) {
+        console.error("agent POST error:", err);
+        const errorResponse = getAgentErrorResponse(err);
+        return response(event, errorResponse.statusCode, {
+          message: errorResponse.message
+        });
+      }
     }
 
     if (route.endsWith("/admin/availability") && event.httpMethod === "GET") {
@@ -886,6 +1611,76 @@ export const handler = async (event: any) => {
       }
 
       return response(event, 200, { items });
+    }
+
+    if (
+      route.endsWith("/admin/assignments/generate") &&
+      event.httpMethod === "POST"
+    ) {
+      const body = parseJsonBody(event);
+      if (body === null) {
+        return response(event, 400, { message: "Invalid JSON body." });
+      }
+
+      const month = body.month as string | undefined;
+      const minStaffPerSlotValue = Number(body.minStaffPerSlot ?? "2");
+      const minStaffPerSlot = Number.isFinite(minStaffPerSlotValue)
+        ? Math.max(1, Math.min(10, Math.round(minStaffPerSlotValue)))
+        : 2;
+      const staffingRules = normalizeStaffingRules(
+        body.staffingRules,
+        minStaffPerSlot
+      );
+      const rolesInput = body.roles as string[] | undefined;
+      const roles =
+        Array.isArray(rolesInput) && rolesInput.length > 0
+          ? rolesInput.filter(isAssignmentRole)
+          : [...ASSIGNMENT_ROLES];
+
+      if (!isValidMonth(month)) {
+        return response(event, 400, { message: "month is required (YYYY-MM)." });
+      }
+
+      if (roles.length === 0) {
+        return response(event, 400, { message: "roles is invalid." });
+      }
+
+      const submissionResult = await docClient.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+          ExpressionAttributeValues: {
+            ":pk": month,
+            ":sk": "SUBMISSION#"
+          }
+        })
+      );
+
+      const submissions = (submissionResult.Items ?? []) as SubmissionItem[];
+      const draft = generateAssignmentDraft({
+        month,
+        minStaffPerSlot,
+        staffingRules,
+        roles,
+        submissions
+      });
+      const explanation = await explainGeneratedAssignments({
+        month,
+        minStaffPerSlot,
+        assignments: draft.assignments,
+        shortages: draft.shortages,
+        staffLoads: draft.staffLoads
+      });
+
+      return response(event, 200, {
+        month,
+        assignments: draft.assignments,
+        shortages: draft.shortages,
+        staffLoads: draft.staffLoads,
+        explanation,
+        rules: draft.rules,
+        generatedAt: new Date().toISOString()
+      });
     }
 
     if (route.endsWith("/admin/assignments") && event.httpMethod === "POST") {
@@ -1544,6 +2339,10 @@ export const handler = async (event: any) => {
       return response(event, 200, { items: item ? [mapItem(item)] : [] });
     }
 
+    if (!isManager) {
+      return response(event, 403, { message: "店長のみ提出一覧を取得できます。" });
+    }
+
     const result = await docClient.send(
       new QueryCommand({
         TableName: TABLE_NAME,
@@ -1633,6 +2432,77 @@ export const handler = async (event: any) => {
     });
 
     return response(event, 200, { status: publishState.status, items });
+  }
+
+  if (route.endsWith("/assignments/generate") && event.httpMethod === "POST") {
+    if (!isManager) {
+      return response(event, 403, { message: "店長のみ操作できます。" });
+    }
+
+    const body = parseJsonBody(event);
+    if (body === null) {
+      return response(event, 400, { message: "Invalid JSON body." });
+    }
+
+    const month = body.month as string | undefined;
+    const minStaffPerSlotValue = Number(body.minStaffPerSlot ?? "2");
+    const minStaffPerSlot = Number.isFinite(minStaffPerSlotValue)
+      ? Math.max(1, Math.min(10, Math.round(minStaffPerSlotValue)))
+      : 2;
+    const staffingRules = normalizeStaffingRules(
+      body.staffingRules,
+      minStaffPerSlot
+    );
+    const rolesInput = body.roles as string[] | undefined;
+    const roles =
+      Array.isArray(rolesInput) && rolesInput.length > 0
+        ? rolesInput.filter(isAssignmentRole)
+        : [...ASSIGNMENT_ROLES];
+
+    if (!isValidMonth(month)) {
+      return response(event, 400, { message: "month is required (YYYY-MM)." });
+    }
+
+    if (roles.length === 0) {
+      return response(event, 400, { message: "roles is invalid." });
+    }
+
+    const submissionResult = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        KeyConditionExpression: "pk = :pk and begins_with(sk, :sk)",
+        ExpressionAttributeValues: {
+          ":pk": month,
+          ":sk": "SUBMISSION#"
+        }
+      })
+    );
+
+    const submissions = (submissionResult.Items ?? []) as SubmissionItem[];
+    const draft = generateAssignmentDraft({
+      month,
+      minStaffPerSlot,
+      staffingRules,
+      roles,
+      submissions
+    });
+    const explanation = await explainGeneratedAssignments({
+      month,
+      minStaffPerSlot,
+      assignments: draft.assignments,
+      shortages: draft.shortages,
+      staffLoads: draft.staffLoads
+    });
+
+    return response(event, 200, {
+      month,
+      assignments: draft.assignments,
+      shortages: draft.shortages,
+      staffLoads: draft.staffLoads,
+      explanation,
+      rules: draft.rules,
+      generatedAt: new Date().toISOString()
+    });
   }
 
   if (route.endsWith("/assignments") && event.httpMethod === "POST") {

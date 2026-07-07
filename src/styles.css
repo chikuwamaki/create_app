@@ -179,6 +179,102 @@ body {
   border-color: var(--accent);
 }
 
+.auto-assign-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.auto-assign-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.auto-assign-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.auto-assign-controls input[type="number"] {
+  width: 76px;
+}
+
+.override-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.override-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.override-chip button {
+  padding: 0 4px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+}
+
+.formula-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.markdown-body {
+  margin-top: 8px;
+}
+
+.markdown-body h3 {
+  margin: 12px 0 6px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.markdown-body h3:first-child {
+  margin-top: 0;
+}
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-list {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+
+.markdown-list li {
+  margin: 4px 0;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;

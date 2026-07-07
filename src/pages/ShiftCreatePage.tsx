@@ -4,13 +4,17 @@ import {
   fetchAssignments,
   fetchPublishState,
   fetchSubmissions,
+  generateAssignments,
   publishAssignments,
   saveAssignments,
   type Assignment as ApiAssignment,
+  type GenerateAssignmentsResult,
   type PublishState,
+  type StaffingRules,
   type Submission
 } from "../api/shiftApi";
 import { formatMonth, getMonthOptions } from "../utils/monthOptions";
+import { renderMarkdownText } from "../utils/markdown";
 
 type DayCell = {
   date: string;
@@ -49,6 +53,10 @@ function formatDate(date: Date): string {
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function firstDayOfMonth(monthValue: string): string {
+  return `${monthValue}-01`;
 }
 
 function buildCalendar(monthValue: string): DayCell[][] {
@@ -164,6 +172,15 @@ export default function ShiftCreatePage() {
     status: "draft"
   });
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [minStaffPerSlot, setMinStaffPerSlot] = useState(2);
+  const [weekdayStaffPerSlot, setWeekdayStaffPerSlot] = useState(2);
+  const [weekendStaffPerSlot, setWeekendStaffPerSlot] = useState(3);
+  const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
+  const [overrideDate, setOverrideDate] = useState(firstDayOfMonth(selectedMonth));
+  const [overrideCount, setOverrideCount] = useState(4);
+  const [generatedResult, setGeneratedResult] =
+    useState<GenerateAssignmentsResult | null>(null);
   const dragState = useRef<{ active: boolean; mode: "assign" | "clear" | null }>({
     active: false,
     mode: null
@@ -177,6 +194,11 @@ export default function ShiftCreatePage() {
     setSelectedDate((prev) =>
       prev && prev.startsWith(selectedMonth) ? prev : firstDate
     );
+    setOverrideDate((prev) =>
+      prev.startsWith(selectedMonth) ? prev : firstDayOfMonth(selectedMonth)
+    );
+    setDateOverrides({});
+    setGeneratedResult(null);
   }, [selectedMonth]);
 
   useEffect(() => {
@@ -400,6 +422,91 @@ export default function ShiftCreatePage() {
     applyCell(time, staffId, dragState.current.mode);
   };
 
+  const addDateOverride = () => {
+    if (!overrideDate.startsWith(selectedMonth)) {
+      setNotice({
+        tone: "error",
+        text: "特定日は選択中の月内の日付を指定してください。"
+      });
+      return;
+    }
+    setDateOverrides((prev) => ({
+      ...prev,
+      [overrideDate]: Math.max(1, Math.min(10, overrideCount))
+    }));
+  };
+
+  const removeDateOverride = (date: string) => {
+    setDateOverrides((prev) => {
+      const next = { ...prev };
+      delete next[date];
+      return next;
+    });
+  };
+
+  const handleGenerateAssignments = async () => {
+    if (!idToken) {
+      setNotice({ tone: "error", text: "認証情報がありません。" });
+      return;
+    }
+    const staffingRules: StaffingRules = {
+      defaultStaffPerSlot: minStaffPerSlot,
+      weekdayStaffPerSlot,
+      weekendStaffPerSlot,
+      dateOverrides
+    };
+    setIsGenerating(true);
+    try {
+      const result = await generateAssignments({
+        month: selectedMonth,
+        token: idToken,
+        minStaffPerSlot,
+        staffingRules,
+        roles: [...roles]
+      });
+      setAssignmentsByDate(assignmentsFromApi(result.assignments));
+      setGeneratedResult(result);
+      setNotice({
+        tone: "success",
+        text: `自動作成案を反映しました。割当案${result.assignments.length}件、不足${result.shortages.length}件です。`
+      });
+    } catch (err) {
+      setNotice({
+        tone: "error",
+        text: err instanceof Error ? err.message : "自動作成に失敗しました。"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!idToken) {
+      setNotice({ tone: "error", text: "認証情報がありません。" });
+      return;
+    }
+    const assignments = buildAssignmentsPayload();
+    if (!assignments.length) {
+      setNotice({ tone: "error", text: "割当がありません。" });
+      return;
+    }
+    setIsPublishing(true);
+    try {
+      await saveAssignments({
+        payload: { month: selectedMonth, assignments },
+        token: idToken
+      });
+      setNotice({ tone: "success", text: "下書き保存しました。" });
+    } catch (err) {
+      setNotice({
+        tone: "error",
+        text: err instanceof Error ? err.message : "保存に失敗しました。"
+      });
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const handlePublish = async () => {
     if (!idToken) {
       setNotice({ tone: "error", text: "認証情報がありません。" });
@@ -474,6 +581,121 @@ export default function ShiftCreatePage() {
             ? "公開中..."
             : "公開"}
         </button>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={handleSaveDraft}
+          disabled={isPublishing}
+        >
+          下書き保存
+        </button>
+      </div>
+      <div className="auto-assign-panel">
+        <div className="auto-assign-controls">
+          <label>
+            基本
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={minStaffPerSlot}
+              onChange={(event) =>
+                setMinStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            平日
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={weekdayStaffPerSlot}
+              onChange={(event) =>
+                setWeekdayStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            土日
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={weekendStaffPerSlot}
+              onChange={(event) =>
+                setWeekendStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            特定日
+            <input
+              type="date"
+              value={overrideDate}
+              onChange={(event) => setOverrideDate(event.target.value)}
+            />
+          </label>
+          <label>
+            人数
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={overrideCount}
+              onChange={(event) =>
+                setOverrideCount(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <button type="button" onClick={addDateOverride}>
+            特定日追加
+          </button>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={handleGenerateAssignments}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "作成中..." : "自動作成"}
+          </button>
+        </div>
+        {Object.keys(dateOverrides).length ? (
+          <div className="override-list">
+            {Object.entries(dateOverrides)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([date, count]) => (
+                <span key={date} className="override-chip">
+                  {date}: {count}人
+                  <button type="button" onClick={() => removeDateOverride(date)}>
+                    ×
+                  </button>
+                </span>
+              ))}
+          </div>
+        ) : null}
+        {generatedResult ? (
+          <div className="formula-box">
+            割当案: {generatedResult.assignments.length}件 / 不足:
+            {generatedResult.shortages.length}件
+            <br />
+            <div className="markdown-body">
+              {renderMarkdownText(generatedResult.explanation)}
+            </div>
+          </div>
+        ) : (
+          <p className="hint">
+            希望シフトをもとに、平日・土日・特定日の必要人数を考慮して割当案を作成します。
+          </p>
+        )}
       </div>
       <div className="status-row">
         <span className="status-pill">選択中: {selectedDateLabel}</span>

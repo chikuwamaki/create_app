@@ -263,3 +263,8 @@ flowchart LR
 - GET /assignments?month= (公開後は全員可)
 - POST /publish (公開確定 -> 編集ロック)
 - GET /publish?month=
+
+## URL
+- 管理者画面: https://dulnatgqnwo91.cloudfront.net/assignments
+- 店長画面: https://d2jcq7zr1cscbk.cloudfront.net/create
+- AIアシスタント: https://dulnatgqnwo91.cloudfront.net/agent

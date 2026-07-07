@@ -93,6 +93,59 @@ export type AdminCostSummary = {
   note?: string;
 };
 
+export type AdminAgentResponse = {
+  answer: string;
+  source: "gemini";
+  model: string;
+  anonymized: boolean;
+  totals: {
+    staff: number;
+    submissions: number;
+    assignments: number;
+    slots: number;
+    noSubmissionDates?: number;
+  };
+};
+
+export type AdminGeneratedAssignmentSummary = {
+  staffId: string;
+  staffName: string;
+  assignedCount: number;
+  submittedCount: number;
+};
+
+export type AdminGeneratedShortage = {
+  date: string;
+  time: string;
+  requiredCount: number;
+  assignedCount: number;
+  shortageCount: number;
+  availableCount: number;
+};
+
+export type AdminGenerateAssignmentsResponse = {
+  month: string;
+  assignments: AdminAssignment[];
+  shortages: AdminGeneratedShortage[];
+  staffLoads: AdminGeneratedAssignmentSummary[];
+  explanation: string;
+  generatedAt: string;
+  rules: {
+    minStaffPerSlot: number;
+    staffingRules?: StaffingRules;
+    roles: string[];
+    source: string;
+    strategy: string;
+  };
+};
+
+export type StaffingRules = {
+  defaultStaffPerSlot: number;
+  weekdayStaffPerSlot: number;
+  weekendStaffPerSlot: number;
+  dateOverrides: Record<string, number>;
+};
+
 function requireEnv(name: string): string {
   const value = import.meta.env[name] as string | undefined;
   if (!value) {
@@ -274,6 +327,22 @@ export async function upsertAdminAssignments(params: {
   });
 }
 
+export async function generateAdminAssignments(params: {
+  month: string;
+  token: string;
+  minStaffPerSlot: number;
+  staffingRules: StaffingRules;
+  roles: AssignmentRole[];
+}): Promise<AdminGenerateAssignmentsResponse> {
+  const url = buildUrl("admin/assignments/generate");
+  return await postJson<AdminGenerateAssignmentsResponse>(url, params.token, {
+    month: params.month,
+    minStaffPerSlot: params.minStaffPerSlot,
+    staffingRules: params.staffingRules,
+    roles: params.roles
+  });
+}
+
 export async function deleteAdminAssignments(params: {
   month: string;
   token: string;
@@ -362,6 +431,20 @@ export async function fetchAdminCost(params: {
 }): Promise<AdminCostSummary> {
   const url = buildUrl("admin/cost");
   return await getJson<AdminCostSummary>(url, params.token);
+}
+
+export async function askAdminAgent(params: {
+  token: string;
+  month: string;
+  question: string;
+  minStaffPerSlot: number;
+}): Promise<AdminAgentResponse> {
+  const url = buildUrl("admin/agent");
+  return await postJson<AdminAgentResponse>(url, params.token, {
+    month: params.month,
+    question: params.question,
+    minStaffPerSlot: params.minStaffPerSlot
+  });
 }
 
 export async function backfillTtl(params: {

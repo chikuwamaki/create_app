@@ -32,6 +32,38 @@ export type AssignmentsPayload = {
   assignments: Assignment[];
 };
 
+export type StaffingRules = {
+  defaultStaffPerSlot: number;
+  weekdayStaffPerSlot: number;
+  weekendStaffPerSlot: number;
+  dateOverrides: Record<string, number>;
+};
+
+export type GeneratedShortage = {
+  date: string;
+  time: string;
+  requiredCount: number;
+  assignedCount: number;
+  shortageCount: number;
+  availableCount: number;
+};
+
+export type GeneratedStaffLoad = {
+  staffId: string;
+  staffName: string;
+  assignedCount: number;
+  submittedCount: number;
+};
+
+export type GenerateAssignmentsResult = {
+  month: string;
+  assignments: Assignment[];
+  shortages: GeneratedShortage[];
+  staffLoads: GeneratedStaffLoad[];
+  explanation: string;
+  generatedAt: string;
+};
+
 function requireEnv(name: string): string {
   const value = import.meta.env[name] as string | undefined;
   if (!value) {
@@ -156,6 +188,39 @@ export async function saveAssignments(params: {
   if (!response.ok) {
     throw new Error(data.message ?? "シフトの保存に失敗しました。");
   }
+}
+
+export async function generateAssignments(params: {
+  month: string;
+  token: string;
+  minStaffPerSlot: number;
+  staffingRules: StaffingRules;
+  roles: AssignmentRole[];
+}): Promise<GenerateAssignmentsResult> {
+  const url = buildUrl("assignments/generate");
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${params.token}`
+    },
+    body: JSON.stringify({
+      month: params.month,
+      minStaffPerSlot: params.minStaffPerSlot,
+      staffingRules: params.staffingRules,
+      roles: params.roles
+    })
+  });
+
+  const data = await parseJson<GenerateAssignmentsResult & { message?: string }>(
+    response
+  );
+
+  if (!response.ok) {
+    throw new Error(data.message ?? "シフト自動作成に失敗しました。");
+  }
+
+  return data;
 }
 
 export async function fetchPublishState(params: {

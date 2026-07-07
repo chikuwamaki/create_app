@@ -11,6 +11,7 @@ import UsersPage from "./pages/UsersPage";
 import PublishPage from "./pages/PublishPage";
 import TtlPage from "./pages/TtlPage";
 import CostPage from "./pages/CostPage";
+import AgentPage from "./pages/AgentPage";
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const auth = useAuth();
@@ -43,8 +44,9 @@ export default function App() {
           <NavLink to="/assignments">割当</NavLink>
           <NavLink to="/publish">公開状態</NavLink>
           <NavLink to="/users">ユーザー</NavLink>
+          <NavLink to="/agent">AIアシスタント</NavLink>
           <NavLink to="/cost">コスト</NavLink>
-          <NavLink to="/ttl">データ整理</NavLink>
+          <NavLink to="/ttl">データ管理</NavLink>
         </nav>
         <div className="auth">
           {auth.isAuthenticated ? (
@@ -88,6 +90,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <UsersPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/agent"
+            element={
+              <PrivateRoute>
+                <AgentPage />
               </PrivateRoute>
             }
           />

@@ -4,12 +4,17 @@ import {
   deleteAdminAssignments,
   fetchAdminAssignments,
   fetchAdminSubmissions,
+  generateAdminAssignments,
+  replaceAdminAssignments,
   upsertAdminAssignments,
   type AdminAssignment,
+  type AdminGenerateAssignmentsResponse,
   type AdminSubmission,
-  type AssignmentRole
+  type AssignmentRole,
+  type StaffingRules
 } from "../api/adminApi";
 import { defaultOperationalMonth, monthOptions } from "../utils/monthOptions";
+import { renderMarkdownText } from "../utils/markdown";
 
 const roles: Array<{ value: AssignmentRole; label: string }> = [
   { value: "ホール", label: "ホール" },
@@ -49,6 +54,14 @@ export default function AssignmentsPage() {
   const [staffFilter, setStaffFilter] = useState("");
   const [items, setItems] = useState<AdminAssignment[]>([]);
   const [submissions, setSubmissions] = useState<AdminSubmission[]>([]);
+  const [generated, setGenerated] =
+    useState<AdminGenerateAssignmentsResponse | null>(null);
+  const [minStaffPerSlot, setMinStaffPerSlot] = useState(2);
+  const [weekdayStaffPerSlot, setWeekdayStaffPerSlot] = useState(2);
+  const [weekendStaffPerSlot, setWeekendStaffPerSlot] = useState(3);
+  const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
+  const [overrideDate, setOverrideDate] = useState(firstDayOfMonth(month));
+  const [overrideCount, setOverrideCount] = useState(4);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
@@ -111,6 +124,7 @@ export default function AssignmentsPage() {
       ]);
       setItems(assignments);
       setSubmissions(availability);
+      setGenerated(null);
     } catch (error) {
       setNotice({
         tone: "error",
@@ -126,6 +140,10 @@ export default function AssignmentsPage() {
       ...prev,
       date: prev.date.startsWith(month) ? prev.date : firstDayOfMonth(month)
     }));
+    setOverrideDate((prev) =>
+      prev.startsWith(month) ? prev : firstDayOfMonth(month)
+    );
+    setDateOverrides({});
   }, [month]);
 
   useEffect(() => {
@@ -216,6 +234,101 @@ export default function AssignmentsPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const generateDraft = async () => {
+    if (!token) {
+      setNotice({ tone: "error", text: "認証情報がありません。" });
+      return;
+    }
+    const staffingRules: StaffingRules = {
+      defaultStaffPerSlot: minStaffPerSlot,
+      weekdayStaffPerSlot,
+      weekendStaffPerSlot,
+      dateOverrides
+    };
+    setSaving(true);
+    setNotice(null);
+    try {
+      const result = await generateAdminAssignments({
+        month,
+        token,
+        minStaffPerSlot,
+        staffingRules,
+        roles: roles.map((role) => role.value)
+      });
+      setGenerated(result);
+      setItems(result.assignments);
+      setNotice({
+        tone: "success",
+        text: `自動作成案を生成しました。${result.assignments.length}件の割当案、${result.shortages.length}件の不足があります。`
+      });
+    } catch (error) {
+      setNotice({
+        tone: "error",
+        text: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveGeneratedDraft = async () => {
+    if (!token || !generated) {
+      return;
+    }
+    const ok = window.confirm(
+      `${month} の割当を自動作成案 ${generated.assignments.length} 件で置き換えます。よろしいですか？`
+    );
+    if (!ok) {
+      return;
+    }
+    setSaving(true);
+    setNotice(null);
+    try {
+      await replaceAdminAssignments({
+        month,
+        token,
+        assignments: generated.assignments
+      });
+      setGenerated(null);
+      setNotice({ tone: "success", text: "自動作成案を保存しました。" });
+      await load();
+    } catch (error) {
+      setNotice({
+        tone: "error",
+        text: error instanceof Error ? error.message : String(error)
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const discardGeneratedDraft = async () => {
+    setGenerated(null);
+    await load();
+  };
+
+  const addDateOverride = () => {
+    if (!overrideDate.startsWith(month)) {
+      setNotice({
+        tone: "error",
+        text: "特定日は選択中の月内の日付を指定してください。"
+      });
+      return;
+    }
+    setDateOverrides((prev) => ({
+      ...prev,
+      [overrideDate]: Math.max(1, Math.min(10, overrideCount))
+    }));
+  };
+
+  const removeDateOverride = (date: string) => {
+    setDateOverrides((prev) => {
+      const next = { ...prev };
+      delete next[date];
+      return next;
+    });
   };
 
   const edit = (item: AdminAssignment) => {
@@ -311,6 +424,126 @@ export default function AssignmentsPage() {
           CSV
         </button>
       </div>
+
+      <section className="admin-editor">
+        <h3>シフトを自動作成</h3>
+        <div className="controls">
+          <label>
+            基本人数
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={minStaffPerSlot}
+              onChange={(event) =>
+                setMinStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            平日
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={weekdayStaffPerSlot}
+              onChange={(event) =>
+                setWeekdayStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            土日
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={weekendStaffPerSlot}
+              onChange={(event) =>
+                setWeekendStaffPerSlot(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <label>
+            特定日
+            <input
+              type="date"
+              value={overrideDate}
+              onChange={(event) => setOverrideDate(event.target.value)}
+            />
+          </label>
+          <label>
+            人数
+            <input
+              min={1}
+              max={10}
+              type="number"
+              value={overrideCount}
+              onChange={(event) =>
+                setOverrideCount(
+                  Math.max(1, Math.min(10, Number(event.target.value) || 1))
+                )
+              }
+            />
+          </label>
+          <button type="button" onClick={addDateOverride}>
+            特定日追加
+          </button>
+          <button onClick={generateDraft} disabled={saving || loading}>
+            自動作成
+          </button>
+          <button
+            onClick={saveGeneratedDraft}
+            disabled={saving || !generated}
+            type="button"
+          >
+            生成案を保存
+          </button>
+          <button
+            onClick={discardGeneratedDraft}
+            disabled={saving || !generated}
+            type="button"
+          >
+            生成案を破棄
+          </button>
+        </div>
+        {Object.keys(dateOverrides).length ? (
+          <div className="override-list">
+            {Object.entries(dateOverrides)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([date, count]) => (
+                <span key={date} className="override-chip">
+                  {date}: {count}人
+                  <button type="button" onClick={() => removeDateOverride(date)}>
+                    ×
+                  </button>
+                </span>
+              ))}
+          </div>
+        ) : null}
+        {generated ? (
+          <div className="formula-box">
+            <strong>生成案プレビュー</strong>
+            <br />
+            割当案: {generated.assignments.length}件 / 不足:
+            {generated.shortages.length}件 / 生成日時: {generated.generatedAt}
+            <br />
+            <div className="markdown-body">
+              {renderMarkdownText(generated.explanation)}
+            </div>
+          </div>
+        ) : (
+          <p className="hint">
+            提出済みの希望シフトだけを対象に、勤務回数の偏りと役割希望を考慮して割当案を作成します。
+          </p>
+        )}
+      </section>
 
       <section className="admin-editor">
         <h3>割当を追加・更新</h3>

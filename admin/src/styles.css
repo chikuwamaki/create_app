@@ -285,6 +285,65 @@ select {
   line-height: 1.7;
 }
 
+.markdown-body {
+  margin-top: 8px;
+}
+
+.markdown-body h3 {
+  margin: 12px 0 6px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.markdown-body h3:first-child {
+  margin-top: 0;
+}
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-list {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+
+.markdown-list li {
+  margin: 4px 0;
+}
+
+.override-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.override-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.override-chip button {
+  padding: 0 4px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+}
+
 .primary-button,
 .secondary-button {
   border: none;
@@ -304,6 +363,181 @@ select {
   color: var(--ink);
 }
 
+.agent-page {
+  height: calc(100vh - 128px);
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.agent-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.agent-topbar h2 {
+  margin: 0;
+}
+
+.agent-status {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agent-status span {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fbfaf7;
+}
+
+.agent-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.agent-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.agent-controls input {
+  width: 86px;
+}
+
+.agent-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.agent-metrics div {
+  min-height: 58px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfaf7;
+}
+
+.agent-metrics span {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.agent-metrics strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.agent-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.agent-presets button {
+  background: var(--accent-soft);
+  color: var(--ink);
+  padding: 8px 12px;
+}
+
+.agent-chat {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 6px 16px 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.agent-message {
+  width: min(760px, 92%);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.agent-message--user {
+  justify-self: end;
+  background: var(--accent-strong);
+  color: #f8f6f1;
+}
+
+.agent-message--assistant {
+  justify-self: start;
+  background: #fbfaf7;
+}
+
+.agent-message__role {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.agent-message__meta {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.agent-message__text {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.agent-footer {
+  flex: 0 0 auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.agent-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 0;
+}
+
+.agent-input textarea {
+  min-height: 56px;
+  max-height: 160px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #d8d7d3;
+  border-radius: 8px;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.6;
+}
+
 @media (max-width: 760px) {
   .admin-header {
     align-items: flex-start;
@@ -316,5 +550,27 @@ select {
 
   .metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .agent-page {
+    height: calc(100vh - 180px);
+    min-height: 560px;
+  }
+
+  .agent-topbar {
+    flex-direction: column;
+  }
+
+  .agent-controls {
+    justify-content: flex-start;
+  }
+
+  .agent-metrics,
+  .agent-input {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-message {
+    width: 100%;
   }
 }
